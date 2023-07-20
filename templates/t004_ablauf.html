@@ -1,0 +1,20 @@
+{% include "navbar.html" %}
+
+
+<style>
+    .bi{
+        margin-left: 10px;
+    }
+</style>
+<button onclick="neu()" class="btn btn-primary">Neu</button>
+
+<div class="container-fluid">
+    <div class="row-1">
+        <div class="col-12">
+            <div id="ausgabe"></div>
+        </div>
+    </div>
+</div>
+
+{% include 'footer.html' %}
+<script src="{{ url_for('static', filename='js/t004_ablauf.js') }}"></script>

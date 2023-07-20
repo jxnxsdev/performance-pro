@@ -1,0 +1,22 @@
+{% include "navbar.html" %}
+
+
+<style>
+    .bi{
+        margin-left: 10px;
+    }
+</style>
+<button onclick="send('ablauf_produktion_weiter')" class="btn btn-primary">weiter F1</button>
+<button onclick="send('ablauf_produktion_zurueck')" class="btn btn-primary">zurück F1</button>
+
+
+<div class="container-fluid">
+    <div class="row-1">
+        <div class="col-12">
+            <div id="ausgabe"></div>
+        </div>
+    </div>
+</div>
+
+{% include 'footer.html' %}
+<script src="{{ url_for('static', filename='js/t005_produktion.js') }}"></script>
