@@ -3,9 +3,14 @@ import sqlite3
 import json
 from datetime import datetime
 import pandas as pd
-
+from pathlib import Path, PureWindowsPath
+import sys
 app = Flask(__name__)
 
+if sys.platform == 'win32':
+    data_folder = PureWindowsPath(__file__).parents[0]
+else:
+    data_folder = Path("perfomance_pro/db/")
 
 
 
@@ -46,11 +51,11 @@ def api_stueckerzeugen():
     aktuelles_Stueck = json.loads(get_my_jsonified_data_DB1("select max(id) id from T001_stueck;"))[0]["id"]
     
 
-    set_sql_data("CREATE TABLE T002_kanaele (id INTEGER PRIMARY KEY   AUTOINCREMENT, kanal_nr int, midi_kanal int, maskierung int ,midi_befehl char(4) )",[])
-    set_sql_data("CREATE TABLE T003_besetzung (id INTEGER PRIMARY KEY   AUTOINCREMENT, kanal_nr int, beschreibung_1 varchar(300), beschreibung_2 varchar(300) , farbe char(6), gruppe int)",[])
+    set_sql_data("CREATE TABLE T002_kanaele (id INTEGER PRIMARY KEY   AUTOINCREMENT, kanal_nr int, midi_kanal int, maskierung int ,midi_befehl char(4), frequenz varchar(40),  beschreibung_1 varchar(300), beschreibung_2 varchar(300), gruppe int )",[])
+#    set_sql_data("CREATE TABLE T003_besetzung (id INTEGER PRIMARY KEY   AUTOINCREMENT, kanal_nr int, beschreibung_1 varchar(300), beschreibung_2 varchar(300) , farbe char(6), gruppe int)",[])
     for i in range (1 and 33):
         set_sql_data("insert into T002_kanaele ( kanal_nr , midi_kanal ,maskierung ,midi_befehl) values (?,?,0,'84') ",[i,i])
-        set_sql_data("insert into T003_besetzung ( kanal_nr , beschreibung_1  ) values (?,'') ",[i])
+ #       set_sql_data("insert into T003_besetzung ( kanal_nr , beschreibung_1  ) values (?,'') ",[i])
     
     set_sql_data("CREATE TABLE T004_ablauf (id INTEGER PRIMARY KEY   AUTOINCREMENT, ablauf_id int, stichwort varchar(1000), aktion varchar(8000) )",[])
 
@@ -75,7 +80,27 @@ def api_kanaele():
 
 @app.route("/api/kanal_save",methods = ['POST'])
 def api_kanal_save():
-    set_sql_data("update T002_kanaele set kanal_nr = ?, midi_kanal = ? where id = ?",[request.get_json()["kanal_nr"],request.get_json()["midi_kanal"],request.get_json()["id"]])
+    set_sql_data("""update T002_kanaele set kanal_nr = ?
+                 , midi_kanal = ? 
+                 , maskierung = ?
+                 , midi_befehl = ?
+                 , frequenz = ?
+                 , beschreibung_1 = ?
+                 , beschreibung_2 = ?
+                 , gruppe = ?
+                 where id = ?"""
+                 
+                 ,[
+                     request.get_json()["kanal_nr"]
+                   , request.get_json()["midi_kanal"]
+                   , request.get_json()["maskierung"]
+                   , request.get_json()["midi_befehl"]
+                   , request.get_json()["frequenz"]
+                   , request.get_json()["beschreibung_1"]
+                   , request.get_json()["beschreibung_2"]
+                   , request.get_json()["id"]
+                   
+                   ])
     return get_my_jsonified_data('select * from T002_kanaele order by id')
 
 ########################################################################################################################
@@ -228,20 +253,21 @@ def api_maskieren_toggle():
 
 #######################################################################################################################
 def get_my_jsonified_data_DB1(sql):
-    cnx = sqlite3.connect("db/db.db")
+    cnx = sqlite3.connect(data_folder / "db" / "db.db")
     data = pd.read_sql_query(sql, cnx).to_json(orient ='records')
 
     #print(data)
     return data
 
 def get_my_jsonified_data(sql):
-    cnx = sqlite3.connect("db/"+str(aktuelles_Stueck)+".db")
+    t = str(aktuelles_Stueck)+".db"
+    cnx = sqlite3.connect(data_folder  / "db" / t)
     data = pd.read_sql_query(sql, cnx).to_json(orient ='records')
     #print(data)
     return data
 
 def set_sql_data_DB1(sql,para):
-    con = sqlite3.connect("db/db.db")
+    con = sqlite3.connect(data_folder / "db" / "db.db")
     cur = con.cursor()
     #print(sql)
     cur.execute(sql,para)
@@ -249,7 +275,8 @@ def set_sql_data_DB1(sql,para):
     return {}
 
 def set_sql_data(sql,para):
-    con = sqlite3.connect("db/"+str(aktuelles_Stueck)+".db")
+    t = str(aktuelles_Stueck)+".db"
+    con = sqlite3.connect(data_folder / "db" / t)
     cur = con.cursor()
     print(sql)
     cur.execute(sql,para)
@@ -265,3 +292,9 @@ def db_create():
     return 'das hat funktioniert'
 
 aktuelles_Stueck = json.loads(get_my_jsonified_data_DB1("select max(id) id from T001_stueck;"))[0]["id"]
+
+
+
+if __name__ == '__main__':
+    import os
+    #flask --debug --app app run

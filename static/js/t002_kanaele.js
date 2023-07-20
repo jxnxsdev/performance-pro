@@ -1,28 +1,3 @@
-// window.addEventListener('keydown', function(event){ 
-//   switch(event.keyCode) { 
-//     case 112: f1(); break; 
-//     case 113: f2(); break; 
-//     case 114: f3(); break; 
-//     case 115: f4(); break; 
-//     case 116: f5(); break; 
-//     case 117: f6(); break; 
-//     case 118: f7(); break; 
-//     case 119: f8(); break; 
-//     case 120: f9(); break; 
-//     case 121: f10(); break; 
-//     case 122: f11(); break; 
-//     case 123: f12(); break; 
-//   } 
-//   event.preventDefault(); 
-// }); 
-
-// function f1() { 
-//   // mein Code für die Taste F1 
-//   console.log("F1")
-// }
-
-
-//document.getElementById("accordionFlushExample").appendChild( CreateAccordionItem());
 kanaele_lesen()
 
 
@@ -88,7 +63,7 @@ function cardausgeben(DatenAusgabe, AusgabeID) {
       
           //################ Jede Zeile #################
       
-            let c = $('<div class="card" style="width: 18rem; margin:20px"></div>')
+            let c = $('<div class="card" style="width: 32%; margin:20px"></div>')
             let cb = $('<div class="card-body"></div>')
             let ct = $('<h5 class="card-title"></h5>')
             
@@ -100,9 +75,15 @@ function cardausgeben(DatenAusgabe, AusgabeID) {
               let mkl = $('<label for="midi_kanal" class="form-label">Midi Kanal:</label>')
               let mk = $('<input type="number" class="form-control" id="midi_kanal" name="midi_kanal">')
               mk.val(m.midi_kanal)
+              let b1l = $('<label for="beschreibung_1" class="form-label">Beschreibung:</label>')
+              let b1 = $('<input type="text" class="form-control" id="beschreibung_1" name="beschreibung_1">')
+              b1.val(m.beschreibung_1)
+              let b2l = $('<label for="beschreibung_2" class="form-label">Beschreibung 2:</label>')
+              let b2 = $('<input type="text" class="form-control" id="beschreibung_2" name="beschreibung_2">')
+              b2.val(m.beschreibung_2)
               let B = $('<button type="submit" class="btn btn-primary">Save</button>')
               B.click(function(){
-                save(m.id, k.val(),mk.val())
+                save(m.id, b1l,b1,b2l, b2, k.val(),mk.val())
                 
               })
               cb.append(kl,k,mkl,mk,B)
@@ -111,7 +92,13 @@ function cardausgeben(DatenAusgabe, AusgabeID) {
             let cont = $('<p class="card-text"></p>')
             cont.text('Midi Kanal: '+m.midi_kanal)
             
-            cb.append(ct, cont)
+            cb.append(ct, cont 
+              ,$('<p class="card-text">'+m.beschreibung_1+'</p>')
+              ,$('<p class="card-text">'+m.beschreibung_2+'</p>')
+              ,$('<p class="card-text">Frequenz: '+m.frequenz+'</p>')
+              ,$('<p class="card-text">Midi Befehl: '+m.midi_befehl+'</p>')
+              ,$('<p class="card-text">ON/OFF: '+m.maskierung+'</p>')
+              )
             
             c.append(cb)
 
