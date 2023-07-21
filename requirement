@@ -1,0 +1,4 @@
+python-rtmidi
+flask
+sqlite3
+pandas
