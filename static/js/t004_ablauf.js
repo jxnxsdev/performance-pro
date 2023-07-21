@@ -1,29 +1,3 @@
-// window.addEventListener('keydown', function(event){ 
-//   switch(event.keyCode) { 
-//     case 112: f1(); break; 
-//     case 113: f2(); break; 
-//     case 114: f3(); break; 
-//     case 115: f4(); break; 
-//     case 116: f5(); break; 
-//     case 117: f6(); break; 
-//     case 118: f7(); break; 
-//     case 119: f8(); break; 
-//     case 120: f9(); break; 
-//     case 121: f10(); break; 
-//     case 122: f11(); break; 
-//     case 123: f12(); break; 
-//   } 
-//   event.preventDefault(); 
-// }); 
-
-// function f1() { 
-//   // mein Code für die Taste F1 
-//   console.log("F1")
-// }
-
-
-//document.getElementById("accordionFlushExample").appendChild( CreateAccordionItem());
-
 let g_besetzung
 besetzung_lesen()
 
@@ -57,7 +31,7 @@ function ablauf_lesen()
 function besetzung_lesen()
 {
   $.ajax({
-    url: "api/besetzung", //the page containing php script
+    url: "api/kanaele", //the page containing php script
     type: "POST", //request type
     dataType: 'json',
     headers: { 'Content-Type': 'application/json' },
@@ -82,7 +56,7 @@ function besetzung_lesen()
 function kanal_zu_name(kanal){
   let ret
   g_besetzung.forEach(function(m){
-    if (kanal == m.kanal_nr)
+    if (kanal == m.id)
     {ret = m}
 
   })
@@ -272,9 +246,9 @@ function cardausgeben(DatenAusgabe, AusgabeID) {
                 {
                   class_ = 'btn-warning'
                 }
-              let name =  kanal_zu_name(k.kanal_nr)
+              let name =  kanal_zu_name(k.id)
               //console.log(name)
-              let B = $('<button type="submit">'+k.kanal_nr+ ' ' + name.beschreibung_1 + '</button>')
+              let B = $('<button type="submit">'+k.id+ ' ' + name.beschreibung_1 + '</button>')
               B.addClass('btn')
               B.addClass(class_)
               B.click(function(){

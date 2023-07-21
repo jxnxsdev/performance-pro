@@ -54,7 +54,26 @@ function stueke_lesen()
 
 }
 
-
+function neu()
+{
+  $.ajax({
+    url: "api/stueckerzeugen", //the page containing php script
+    type: "POST", //request type
+    dataType: 'json',
+    headers: { 'Content-Type': 'application/json' },
+    data: JSON.stringify({
+                
+    }),
+      success:function(result){
+        cardausgeben(result, "ausgabe")
+        console.log(result);      
+    }
+    ,error: function(result){
+      
+      console.log(result);
+    }           
+  } );
+}
 
 function save(id,beschreibung_1,beschreibung_2,jahr)
 {
