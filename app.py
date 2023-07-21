@@ -42,7 +42,7 @@ def api_stueck_save():
     return get_my_jsonified_data_DB1("select * ,(select 'aktiv' from T000_status t0 where t0.key = 'akt_stueck_id' and t0.value = t1.id) as aktiv from T001_stueck t1 order by id desc;")
 
 
-@app.route("/api/stueckerzeugen",methods = ['GET'])
+@app.route("/api/stueckerzeugen",methods = ['POST'])
 def api_stueckerzeugen():
     global aktuelles_Stueck
 
@@ -51,17 +51,17 @@ def api_stueckerzeugen():
     aktuelles_Stueck = json.loads(get_my_jsonified_data_DB1("select max(id) id from T001_stueck;"))[0]["id"]
     
 
-    set_sql_data("CREATE TABLE T002_kanaele (id INTEGER PRIMARY KEY   AUTOINCREMENT, kanal_nr int, midi_kanal int, maskierung int ,midi_befehl char(4), frequenz varchar(40),  beschreibung_1 varchar(300), beschreibung_2 varchar(300), gruppe int )",[])
+    set_sql_data("CREATE TABLE T002_kanaele (id INTEGER PRIMARY KEY ,  midi_kanal int, maskierung int ,midi_befehl char(4), frequenz varchar(40),  beschreibung_1 varchar(300), beschreibung_2 varchar(300), gruppe int, aktiv int )",[])
 #    set_sql_data("CREATE TABLE T003_besetzung (id INTEGER PRIMARY KEY   AUTOINCREMENT, kanal_nr int, beschreibung_1 varchar(300), beschreibung_2 varchar(300) , farbe char(6), gruppe int)",[])
-    for i in range (1 and 33):
-        set_sql_data("insert into T002_kanaele ( kanal_nr , midi_kanal ,maskierung ,midi_befehl) values (?,?,0,'84') ",[i,i])
+    for i in range (1 , 129):
+        set_sql_data("insert into T002_kanaele ( id , midi_kanal ,maskierung ,midi_befehl,frequenz,beschreibung_1,beschreibung_2, gruppe, aktiv) values (?,?,0,'84','','','',0,0) ",[i,i])
  #       set_sql_data("insert into T003_besetzung ( kanal_nr , beschreibung_1  ) values (?,'') ",[i])
     
     set_sql_data("CREATE TABLE T004_ablauf (id INTEGER PRIMARY KEY   AUTOINCREMENT, ablauf_id int, stichwort varchar(1000), aktion varchar(8000) )",[])
 
 
 
-    return {} 
+    return api_stuecke()
 
 
 ########################################################################################################################
@@ -80,55 +80,36 @@ def api_kanaele():
 
 @app.route("/api/kanal_save",methods = ['POST'])
 def api_kanal_save():
-    set_sql_data("""update T002_kanaele set kanal_nr = ?
-                 , midi_kanal = ? 
+    set_sql_data("""update T002_kanaele set 
+                  midi_kanal = ? 
                  , maskierung = ?
                  , midi_befehl = ?
                  , frequenz = ?
                  , beschreibung_1 = ?
                  , beschreibung_2 = ?
                  , gruppe = ?
+                 , aktiv = ?
                  where id = ?"""
                  
                  ,[
-                     request.get_json()["kanal_nr"]
-                   , request.get_json()["midi_kanal"]
-                   , request.get_json()["maskierung"]
+                     request.get_json()["midi_kanal"]
+                   , on_to_int(request.get_json()["maskierung"])
                    , request.get_json()["midi_befehl"]
                    , request.get_json()["frequenz"]
                    , request.get_json()["beschreibung_1"]
                    , request.get_json()["beschreibung_2"]
+                   , request.get_json()["gruppe"]
+                   , on_to_int(request.get_json()["aktiv"])
                    , request.get_json()["id"]
                    
                    ])
     return get_my_jsonified_data('select * from T002_kanaele order by id')
 
-########################################################################################################################
-############################################## Besetzung
-########################################################################################################################
-@app.route("/t003_besetzung") 
-def t003_besetzung():
-    top = request.args.get('top') if 'top' in request.args else ''
-    bottom = request.args.get('bottom') if 'bottom' in request.args else ''
-
-    return render_template('t003_besetzung.html', top=top, bottom=bottom)
-
-@app.route("/api/besetzung",methods = ['POST'])
-def api_besetzung():
-    return get_my_jsonified_data('select t3.*, t2.maskierung from T003_besetzung t3 inner join T002_kanaele t2 on t2.kanal_nr = t3.kanal_nr order by id')
-
-@app.route("/api/besetzung_neu",methods = ['POST'])
-def api_besetzung_neu():
-    set_sql_data("insert into T003_besetzung (kanal_nr, beschreibung_1, beschreibung_2, farbe, gruppe) values (0,'neu','','',0)" ,[] )
-    return get_my_jsonified_data('select * from T003_besetzung order by id')
-
-
-@app.route("/api/besetzung_save",methods = ['POST'])
-def api_besetzung_save():
-    set_sql_data("update T003_besetzung set kanal_nr = ?, beschreibung_1 = ?, beschreibung_2 = ? where id = ?",
-                 [request.get_json()["kanal_nr"],request.get_json()["beschreibung_1"],request.get_json()["beschreibung_2"],request.get_json()["id"]])
-    return get_my_jsonified_data('select * from T003_besetzung order by id')
-
+def on_to_int(x):
+    if str(x) == 'on':
+        return 1
+    else:
+        return 0
 #######################################################################################################################
 ############################################## Ablauf
 ########################################################################################################################
@@ -145,7 +126,7 @@ def api_ablauf():
 
 @app.route("/api/ablauf_neu",methods = ['POST'])
 def api_ablauf_neu():
-    result = get_my_jsonified_data('select kanal_nr, 0 as value from T002_kanaele order by kanal_nr')
+    result = get_my_jsonified_data('select id, 0 as value from T002_kanaele order by id')
     set_sql_data("insert into t004_ablauf (ablauf_id, aktion, stichwort) values ((select ifnull(max(ablauf_id)+1,1) from t004_ablauf),?,'' )" ,[result] )
     return get_my_jsonified_data('select * from t004_ablauf order by ablauf_id')
 
@@ -196,7 +177,7 @@ def api_ablauf_toggle():
     ret = 0
     val = 0
     for a in aktion:
-        if a["kanal_nr"] == request.get_json()["kanal_nr"]:
+        if a["id"] == request.get_json()["id"]:
             ret += 1
             a["value"] = 1- a["value"] #request.get_json()["value"]
             val = a["value"]
