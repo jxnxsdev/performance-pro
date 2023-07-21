@@ -106,7 +106,7 @@ def api_kanal_save():
     return get_my_jsonified_data('select * from T002_kanaele order by id')
 
 def on_to_int(x):
-    if str(x) == 'on':
+    if str(x) == 'on' or str(x) == '1':
         return 1
     else:
         return 0
@@ -163,7 +163,7 @@ def api_ablauf_add():
     set_sql_data("update t004_ablauf set ablauf_id = ablauf_id + 1 where ablauf_id > ?",
                 [ablauf_id ])
     ## neu einfügen in Lücke
-    result = get_my_jsonified_data('select kanal_nr, 0 as value from T002_kanaele order by kanal_nr')
+    result = get_my_jsonified_data('select id, 0 as value from T002_kanaele order by id')
     set_sql_data("insert into t004_ablauf (ablauf_id, aktion, stichwort) values (?,?,'' )" ,[ablauf_id + 1, result] )
     return get_my_jsonified_data('select * from t004_ablauf order by ablauf_id')
 
@@ -177,7 +177,7 @@ def api_ablauf_toggle():
     ret = 0
     val = 0
     for a in aktion:
-        if a["id"] == request.get_json()["id"]:
+        if a["id"] == request.get_json()["kanal_nr"]:
             ret += 1
             a["value"] = 1- a["value"] #request.get_json()["value"]
             val = a["value"]
@@ -224,10 +224,10 @@ def api_ablauf_produktion_zurueck():
 
 @app.route("/api/maskieren_toggle",methods = ['POST'])
 def api_maskieren_toggle():
-    maskierung = int(json.loads(get_my_jsonified_data("select maskierung from T002_kanaele where kanal_nr = " + str(request.get_json()["kanal_nr"]) ))[0]["maskierung"])
+    maskierung = int(json.loads(get_my_jsonified_data("select maskierung from T002_kanaele where id = " + str(request.get_json()["id"]) ))[0]["maskierung"])
     maskierung = 1- maskierung
 
-    set_sql_data('update T002_kanaele set maskierung = ? where kanal_nr = ?',[ str(maskierung), str(request.get_json()["kanal_nr"])])    
+    set_sql_data('update T002_kanaele set maskierung = ? where id = ?',[ str(maskierung), str(request.get_json()["id"])])    
     
     return {"return": maskierung} 
 
@@ -259,7 +259,7 @@ def set_sql_data(sql,para):
     t = str(aktuelles_Stueck)+".db"
     con = sqlite3.connect(data_folder / "db" / t)
     cur = con.cursor()
-    print(sql)
+    print(sql, str(para))
     cur.execute(sql,para)
     con.commit()
     return {}

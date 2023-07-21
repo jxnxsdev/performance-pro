@@ -157,7 +157,8 @@ function int_to_on(x,obj){
 }
 
 function switch_to_int(obj){
-  if($(obj).prop('checked', true))
+  
+  if($(obj).prop('checked'))
   {return 1}
   else
   {return 0}

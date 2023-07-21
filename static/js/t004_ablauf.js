@@ -248,6 +248,7 @@ function cardausgeben(DatenAusgabe, AusgabeID) {
                 }
               let name =  kanal_zu_name(k.id)
               //console.log(name)
+              if (name.aktiv ){
               let B = $('<button type="submit">'+k.id+ ' ' + name.beschreibung_1 + '</button>')
               B.addClass('btn')
               B.addClass(class_)
@@ -264,7 +265,7 @@ function cardausgeben(DatenAusgabe, AusgabeID) {
                   headers: { 'Content-Type': 'application/json' },
                   data: JSON.stringify({
                               id: m.id
-                              ,kanal_nr: k.kanal_nr
+                              ,kanal_nr: k.id
                               //, value: 1- k.value
                               
                   }),
@@ -290,6 +291,7 @@ function cardausgeben(DatenAusgabe, AusgabeID) {
                 // cb.append(ct)
               })
               cb.append(B)
+            }
 
             })
             

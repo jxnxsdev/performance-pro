@@ -67,7 +67,7 @@ function send(api)
 function besetzung_lesen()
 {
   $.ajax({
-    url: "api/besetzung", //the page containing php script
+    url: "api/kanaele", //the page containing php script
     type: "POST", //request type
     dataType: 'json',
     headers: { 'Content-Type': 'application/json' },
