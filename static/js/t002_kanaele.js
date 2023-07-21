@@ -28,7 +28,7 @@ function kanaele_lesen()
 
 }
 
-function save(id,midi_kanal,midi_befehl,maskierung,frequenz,beschreibung_1,beschreibung_2, gruppe, aktiv)
+function save(id,midi_kanal,midi_befehl,maskierung,frequenz,beschreibung_1,beschreibung_2, gruppe, aktiv,muss_geprueft_werden,microcheck)
 {
   
   $.ajax({
@@ -46,7 +46,8 @@ function save(id,midi_kanal,midi_befehl,maskierung,frequenz,beschreibung_1,besch
                 , beschreibung_2: beschreibung_2
                 , gruppe: gruppe
                 , aktiv: aktiv
-
+                ,muss_geprueft_werden: muss_geprueft_werden
+                ,microcheck: microcheck
 
     }),
       success:function(result){
@@ -120,12 +121,24 @@ function cardausgeben(DatenAusgabe, AusgabeID) {
               int_to_on(m.aktiv, ma1)
               div1.append(mal1,ma1)
 
+              let div2 = $('<div class="form-check form-switch"></div')
+              let ma2 = $('<input class="form-check-input" type="checkbox" role="switch" id="muss_geprueft_werden">')
+              let mal2 = $('<label class="form-check-label" for="muss_geprueft_werden">muss geprüft werden</label>')
+              int_to_on(m.muss_geprueft_werden, ma2)
+              div2.append(mal2,ma2)
+
+              let div3 = $('<div class="form-check form-switch"></div')
+              let ma3 = $('<input class="form-check-input" type="checkbox" role="switch" id="microcheck">')
+              let mal3 = $('<label class="form-check-label" for="microcheck">Micro Check</label>')
+              int_to_on(m.microcheck, ma3)
+              div3.append(mal3,ma3)
+
               let B = $('<button type="submit" class="btn btn-primary">Save</button>')
               B.click(function(){
-                save(m.id, mk.val(),mb.val(),switch_to_int(ma),f.val(),b1.val(),b2.val(), g.val(), switch_to_int(ma1))
+                save(m.id, mk.val(),mb.val(),switch_to_int(ma),f.val(),b1.val(),b2.val(), g.val(), switch_to_int(ma1), switch_to_int(ma2), switch_to_int(ma3))
                 
               })
-              cb.append(k,b1l, b1, b2l, b2, mbl,mb, mkl,mk,fl, f,div, gl,g, div1, $('<br>'), B)
+              cb.append(k,b1l, b1, b2l, b2, mbl,mb, mkl,mk,fl, f,div, gl,g, div1,div2,div3, $('<br>'), B)
             })
 
             let cont = $('<p class="card-text"></p>')

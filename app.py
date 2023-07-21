@@ -52,10 +52,10 @@ def api_stueckerzeugen():
     aktuelles_Stueck = json.loads(get_my_jsonified_data_DB1("select max(id) id from T001_stueck;"))[0]["id"]
     
 
-    set_sql_data("CREATE TABLE T002_kanaele (id INTEGER PRIMARY KEY ,  midi_kanal int, maskierung int ,midi_befehl char(4), frequenz varchar(40),  beschreibung_1 varchar(300), beschreibung_2 varchar(300), gruppe int, aktiv int )",[])
+    set_sql_data("CREATE TABLE T002_kanaele (id INTEGER PRIMARY KEY ,  midi_kanal int, maskierung int ,midi_befehl char(4), frequenz varchar(40),  beschreibung_1 varchar(300), beschreibung_2 varchar(300), gruppe int, aktiv int,microcheck int, muss_geprueft_werden int )",[])
 #    set_sql_data("CREATE TABLE T003_besetzung (id INTEGER PRIMARY KEY   AUTOINCREMENT, kanal_nr int, beschreibung_1 varchar(300), beschreibung_2 varchar(300) , farbe char(6), gruppe int)",[])
     for i in range (1 , 129):
-        set_sql_data("insert into T002_kanaele ( id , midi_kanal ,maskierung ,midi_befehl,frequenz,beschreibung_1,beschreibung_2, gruppe, aktiv) values (?,?,0,'84','','','',0,0) ",[i,i])
+        set_sql_data("insert into T002_kanaele ( id , midi_kanal ,maskierung ,midi_befehl,frequenz,beschreibung_1,beschreibung_2, gruppe, aktiv,microcheck, muss_geprueft_werden) values (?,?,0,'84','','','',0,0,0,0) ",[i,i])
  #       set_sql_data("insert into T003_besetzung ( kanal_nr , beschreibung_1  ) values (?,'') ",[i])
     
     set_sql_data("CREATE TABLE T004_ablauf (id INTEGER PRIMARY KEY   AUTOINCREMENT, ablauf_id int, stichwort varchar(1000), aktion varchar(8000) )",[])
@@ -90,6 +90,8 @@ def api_kanal_save():
                  , beschreibung_2 = ?
                  , gruppe = ?
                  , aktiv = ?
+                 , muss_geprueft_werden = ?
+                 , microcheck = ?
                  where id = ?"""
                  
                  ,[
@@ -102,7 +104,8 @@ def api_kanal_save():
                    , request.get_json()["gruppe"]
                    , on_to_int(request.get_json()["aktiv"])
                    , request.get_json()["id"]
-                   
+                   , on_to_int(request.get_json()["muss_geprueft_werden"])
+                   , on_to_int(request.get_json()["microcheck"])
                    ])
     return get_my_jsonified_data('select * from T002_kanaele order by id')
 
@@ -231,6 +234,19 @@ def api_maskieren_toggle():
     set_sql_data('update T002_kanaele set maskierung = ? where id = ?',[ str(maskierung), str(request.get_json()["id"])])    
     
     return {"return": maskierung} 
+
+
+#######################################################################################################################
+############################################## Micro Check
+########################################################################################################################
+@app.route("/t006_microcheck") 
+def t006_microcheck():
+    top = request.args.get('top') if 'top' in request.args else ''
+    bottom = request.args.get('bottom') if 'bottom' in request.args else ''
+
+    return render_template('t006_microcheck.html', top=top, bottom=bottom)
+
+
 
 
 #######################################################################################################################
