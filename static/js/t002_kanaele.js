@@ -129,16 +129,18 @@ function cardausgeben(DatenAusgabe, AusgabeID) {
             })
 
             let cont = $('<p class="card-text"></p>')
-            cont.text('Midi Kanal: '+m.midi_kanal)
+            cont.text('Midi Kanal: '+m.midi_kanal + ' Midi Befehl: '+m.midi_befehl)
             
             cb.append(ct, cont 
-              ,$('<p class="card-text">'+m.beschreibung_1+'</p>')
-              ,$('<p class="card-text">'+m.beschreibung_2+'</p>')
+              ,$('<p class="card-text">'+m.beschreibung_1+ ' ' +m.beschreibung_2 +'</p>')
+              
               ,$('<p class="card-text">Frequenz: '+m.frequenz+'</p>')
-              ,$('<p class="card-text">Midi Befehl: '+m.midi_befehl+'</p>')
-              ,$('<p class="card-text">ON/OFF: '+m.maskierung+'</p>')
+              
+              // ,$('<p class="card-text">Maskiert: '+m.maskierung+'</p>')
+              // ,$('<p class="card-text">Aktiv: '+m.aktiv+'</p>')
               )
             
+              if (m.aktiv == 1)c.css("background-color",'#008f00');
             c.append(cb)
 
           container.append(c)  

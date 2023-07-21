@@ -94,7 +94,7 @@ function besetzung_lesen()
 function maskierung_lesen()
 {
   $.ajax({
-    url: "api/besetzung", //the page containing php script
+    url: "api/kanaele", //the page containing php script
     type: "POST", //request type
     dataType: 'json',
     headers: { 'Content-Type': 'application/json' },
@@ -106,9 +106,9 @@ function maskierung_lesen()
         result.forEach(function(m){
           console.log(m)
           if (m.maskierung == 0)
-          {$('.maskierung_'+m.kanal_nr).css({"visibility": "hidden"});}
+          {$('.maskierung_'+m.id).css({"visibility": "hidden"});}
             else
-          {$('.maskierung_'+m.kanal_nr).css({"visibility": "visible"});}
+          {$('.maskierung_'+m.id).css({"visibility": "visible"});}
         })
 
 
@@ -150,7 +150,7 @@ function ablauf_akt_punkt_lesen()
 function kanal_zu_name(kanal){
   let ret
   g_besetzung.forEach(function(m){
-    if (kanal == m.kanal_nr)
+    if (kanal == m.id)
     {ret = m}
 
   })
@@ -334,54 +334,56 @@ function cardausgeben(DatenAusgabe, AusgabeID) {
 
             j.forEach(function(k){
               
-              if (k.value != 0 ) 
+              let name =  kanal_zu_name(k.id)
+              if (name.aktiv == 1)
               {
-                class_ = 'btn-success'
-            
-              }else
+                if (k.value != 0 ) 
                 {
-                  class_ = 'btn-warning'
-                }
-              let name =  kanal_zu_name(k.kanal_nr)
-              //console.log(name)
-              let B = $('<button type="submit">'+k.kanal_nr+ ' ' + name.beschreibung_1 + '<span class="badge rounded-pill badge-notification bg-danger maskierung_'+k.kanal_nr+'">OFF</span></button>')
-              B.addClass('btn')
-              B.addClass(class_)
-              B.click(function(){
-                
-                // toggle(m.id, k.kanal_nr, 1- k.value )
-                
-                $.ajax({
-                  url: "api/maskieren_toggle", //the page containing php script
-                  type: "POST", //request type
-                  dataType: 'json',
-                  headers: { 'Content-Type': 'application/json' },
-                  data: JSON.stringify({
-                    kanal_nr: k.kanal_nr
-                    
-                  }),
-                  success:function(result){
-                      console.log(result)
-                      if (result.return == 0)
-                        {$('.maskierung_'+k.kanal_nr).css({"visibility": "hidden"});}
-                        else
-                        {$('.maskierung_'+k.kanal_nr).css({"visibility": "visible"});}
-                      
-                      
-                    }
-                    ,error: function(result){
-                    console.log(result)
-
-                  }    
-                })       
+                  class_ = 'btn-success'
               
+                }else
+                  {
+                    class_ = 'btn-warning'
+                  }
+                //console.log(name)
+                let B = $('<button type="submit">'+k.id+ ' ' + name.beschreibung_1 + '<span class="badge rounded-pill badge-notification bg-danger maskierung_'+k.id+'">OFF</span></button>')
+                B.addClass('btn')
+                B.addClass(class_)
+                B.click(function(){
+                  
+                  // toggle(m.id, k.kanal_nr, 1- k.value )
+                  
+                  $.ajax({
+                    url: "api/maskieren_toggle", //the page containing php script
+                    type: "POST", //request type
+                    dataType: 'json',
+                    headers: { 'Content-Type': 'application/json' },
+                    data: JSON.stringify({
+                      id: k.id
+                      
+                    }),
+                    success:function(result){
+                        console.log(result)
+                        if (result.return == 0)
+                          {$('.maskierung_'+k.id).css({"visibility": "hidden"});}
+                          else
+                          {$('.maskierung_'+k.id).css({"visibility": "visible"});}
+                        
+                        
+                      }
+                      ,error: function(result){
+                      console.log(result)
 
+                    }    
+                  })       
                 
-                // ct.html("Stichwort: "+s.val() + ' <i class="bi bi-pen"></i>')
-                // cb.append(ct)
-              })
-              cb.append(B)
 
+                  
+                  // ct.html("Stichwort: "+s.val() + ' <i class="bi bi-pen"></i>')
+                  // cb.append(ct)
+                })
+                cb.append(B)
+              }
             })
             
             
