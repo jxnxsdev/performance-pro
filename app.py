@@ -10,7 +10,7 @@ app = Flask(__name__)
 if sys.platform == 'win32':
     data_folder = PureWindowsPath(__file__).parents[0]
 else:
-    data_folder = Path("perfomance_pro/db/")
+    data_folder = Path(__file__).parents[0]
 
 
 
