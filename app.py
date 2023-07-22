@@ -103,9 +103,9 @@ def api_kanal_save():
                    , request.get_json()["beschreibung_2"]
                    , request.get_json()["gruppe"]
                    , on_to_int(request.get_json()["aktiv"])
-                   , request.get_json()["id"]
                    , on_to_int(request.get_json()["muss_geprueft_werden"])
                    , on_to_int(request.get_json()["microcheck"])
+                   , request.get_json()["id"]
                    ])
     return get_my_jsonified_data('select * from T002_kanaele order by id')
 
@@ -246,7 +246,14 @@ def t006_microcheck():
 
     return render_template('t006_microcheck.html', top=top, bottom=bottom)
 
+@app.route("/api/microcheck_toggle",methods = ['POST'])
+def api_microcheck_toggle():
+    microcheck = int(json.loads(get_my_jsonified_data("select microcheck from T002_kanaele where id = " + str(request.get_json()["id"]) ))[0]["microcheck"])
+    microcheck = 1- microcheck
 
+    set_sql_data('update T002_kanaele set microcheck = ? where id = ?',[ str(microcheck), str(request.get_json()["id"])])    
+    
+    return api_kanaele()
 
 
 #######################################################################################################################

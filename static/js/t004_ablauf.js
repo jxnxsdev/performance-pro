@@ -240,18 +240,20 @@ function cardausgeben(DatenAusgabe, AusgabeID) {
               
               if (k.value != 0 ) 
               {
-                class_ = 'btn-success'
+                class_ = 'btn-success '
             
               }else
                 {
-                  class_ = 'btn-warning'
+                  class_ = 'btn-warning '
                 }
               let name =  kanal_zu_name(k.id)
               //console.log(name)
               if (name.aktiv ){
               let B = $('<button type="submit">'+k.id+ ' ' + name.beschreibung_1 + '</button>')
-              B.addClass('btn')
+              B.addClass('btn border border-5 ')
+              B.css('margin-left','1px')
               B.addClass(class_)
+              B.css('border-color','#ff000')
               B.click(function(){
                 
                 B.removeClass('btn-warning','btn-success')

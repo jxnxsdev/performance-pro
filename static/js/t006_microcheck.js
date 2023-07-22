@@ -28,32 +28,6 @@ function kanaele_lesen()
 
 }
 
-function save(id,microcheck)
-{
-  
-  $.ajax({
-    url: "api/kanal_save", //the page containing php script
-    type: "POST", //request type
-    dataType: 'json',
-    headers: { 'Content-Type': 'application/json' },
-    data: JSON.stringify({
-                id: id
-                , microcheck: microcheck
-                
-
-
-    }),
-      success:function(result){
-        cardausgeben(result, "ausgabe")
-        console.log(result);      
-    }
-    ,error: function(result){
-      
-      console.log(result);
-    }           
-  } );
-
-}
 
 function cardausgeben(DatenAusgabe, AusgabeID) {
   var container = $('#'+ AusgabeID);
@@ -83,8 +57,32 @@ function cardausgeben(DatenAusgabe, AusgabeID) {
               // ,$('<p class="card-text">Maskiert: '+m.maskierung+'</p>')
               // ,$('<p class="card-text">Aktiv: '+m.aktiv+'</p>')
               )
-            
-              if (m.aktiv == 1)c.css("background-color",'#008f00');
+              
+              if (m.microcheck == 1)c.css("background-color",'#008f00');
+
+              cb.click(function(){
+                $.ajax({
+                  url: "api/microcheck_toggle", //the page containing php script
+                  type: "POST", //request type
+                  dataType: 'json',
+                  headers: { 'Content-Type': 'application/json' },
+                  data: JSON.stringify({
+                    id: m.id
+                    
+                  }),
+                  success:function(result){
+                    cardausgeben(result, "ausgabe")
+                    console.log(result);
+                      
+                      
+                    }
+                    ,error: function(result){
+                    console.log(result)
+
+                  }    
+                }) 
+              })
+
             c.append(cb)
 
           container.append(c)  

@@ -1,4 +1,5 @@
+rtmidi
 python-rtmidi
 flask
-sqlite3
+pysqlite3
 pandas
