@@ -347,7 +347,8 @@ function cardausgeben(DatenAusgabe, AusgabeID) {
                   }
                 //console.log(name)
                 let B = $('<button type="submit">'+k.id+ ' ' + name.beschreibung_1 + '<span class="badge rounded-pill badge-notification bg-danger maskierung_'+k.id+'">OFF</span></button>')
-                B.addClass('btn')
+                
+                B.addClass('btn border border-5 btn_' + name.gruppe)
                 B.addClass(class_)
                 B.click(function(){
                   

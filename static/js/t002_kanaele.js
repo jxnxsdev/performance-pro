@@ -15,9 +15,6 @@ function kanaele_lesen()
         cardausgeben(result, "ausgabe")
         console.log(result);
        
-
-
-        
       
     }
     ,error: function(result){

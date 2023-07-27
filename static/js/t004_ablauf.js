@@ -235,7 +235,7 @@ function cardausgeben(DatenAusgabe, AusgabeID) {
 
             
             
-
+// BTN für die einzelen
             j.forEach(function(k){
               
               if (k.value != 0 ) 
@@ -250,10 +250,10 @@ function cardausgeben(DatenAusgabe, AusgabeID) {
               //console.log(name)
               if (name.aktiv ){
               let B = $('<button type="submit">'+k.id+ ' ' + name.beschreibung_1 + '</button>')
-              B.addClass('btn border border-5 ')
+              B.addClass('btn border border-5 btn_' + name.gruppe)
               B.css('margin-left','1px')
+
               B.addClass(class_)
-              B.css('border-color','#ff000')
               B.click(function(){
                 
                 B.removeClass('btn-warning','btn-success')
