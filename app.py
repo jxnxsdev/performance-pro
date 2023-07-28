@@ -65,6 +65,8 @@ def new_db0():
 
     global aktuelles_Stueck
     aktuelles_Stueck = 1
+    global aktuelles_Stueck_txt
+    aktuelles_Stueck_txt = ''
     return {"aktuelles_Stueck":"1"}
 
 ########################################################################################################################
@@ -83,8 +85,9 @@ def api_stuecke():
 
 @app.route("/api/stueckauswahl",methods = ['POST'])
 def stueckauswahl():
-    global aktuelles_Stueck
+    global aktuelles_Stueck, aktuelles_Stueck_txt
     aktuelles_Stueck = request.get_json()["id"]
+    aktuelles_Stueck_txt = json.loads(get_my_jsonified_data_DB1("select beschreibung_1 id from T001_stueck where id = "+aktuelles_Stueck+";") )[0]["id"]
     set_sql_data_DB1("REPLACE into T000_status (value, key) values( ? , 'akt_stueck_id');",[request.get_json()["id"]])
     set_sql_data_DB1("REPLACE into T000_status (value, key) values( 1 , 'akt_ablauf');",[])
     
@@ -92,6 +95,9 @@ def stueckauswahl():
 
 @app.route("/api/stueck_save",methods = ['POST'])
 def api_stueck_save():
+
+    global aktuelles_Stueck_txt
+    aktuelles_Stueck_txt = request.get_json()["beschreibung_1"]
     set_sql_data_DB1("update T001_stueck set beschreibung_1 = ?, beschreibung_2 = ?, jahr = ? where id = ?",   [request.get_json()["beschreibung_1"],request.get_json()["beschreibung_2"],request.get_json()["jahr"],request.get_json()["id"] ])
     return get_my_jsonified_data_DB1("select * ,(select 'aktiv' from T000_status t0 where t0.key = 'akt_stueck_id' and t0.value = t1.id) as aktiv from T001_stueck t1 order by id desc;")
 
@@ -101,9 +107,7 @@ def api_stueckerzeugen():
     global aktuelles_Stueck
 
     set_sql_data_DB1("insert into T001_stueck (beschreibung_1, beschreibung_2, jahr) values( 'NEU' , 'NEU' , '" +datetime.now().strftime("%Y")+"' );",[])
-    
-    aktuelles_Stueck = json.loads(get_my_jsonified_data_DB1("select max(id) id from T001_stueck;"))[0]["id"]
-    
+    aktuelles_Stueck = json.loads(get_my_jsonified_data_DB1("select max(id) id from T001_stueck" ) )[0]["id"]
 
     set_sql_data("""CREATE TABLE T002_kanaele 
                  (id INTEGER PRIMARY KEY 
@@ -119,8 +123,36 @@ def api_stueckerzeugen():
                  , muss_geprueft_werden int 
                  )""",[])
 
-    for i in range (1 , 129):
-        set_sql_data("insert into T002_kanaele ( id , midi_kanal ,maskierung ,midi_befehl,frequenz,beschreibung_1,beschreibung_2, gruppe, aktiv,microcheck, muss_geprueft_werden) values (?,?,0,'84','','','',0,0,0,0) ",[i,i])
+
+    kanaele_aus_db1 = get_my_jsonified_data_DB1("select  id , midi_kanal ,maskierung ,midi_befehl,frequenz,beschreibung_1,beschreibung_2, gruppe, aktiv,microcheck, muss_geprueft_werden from T002_kanaele order by 1")
+    for kanal_aus_db1 in kanaele_aus_db1:
+        print(kanal_aus_db1)
+        exit()
+        set_sql_data("""insert into T002_kanaele 
+        ( id 
+        , midi_kanal 
+        ,maskierung 
+        ,midi_befehl
+        ,frequenz
+        ,beschreibung_1
+        ,beschreibung_2
+        , gruppe
+        , aktiv
+        ,microcheck
+        , muss_geprueft_werden) values (?,?,?,?,?,?,?,?,?,?,?) """,
+        [
+            int(kanal_aus_db1["id"])
+            ,kanal_aus_db1["midi_kanal"]
+            ,kanal_aus_db1["maskierung"]
+            ,kanal_aus_db1["midi_befehl"]
+            ,kanal_aus_db1["frequenz"]
+            ,kanal_aus_db1["beschreibung_1"]
+            ,kanal_aus_db1["beschreibung_2"]
+            ,kanal_aus_db1["gruppe"]
+            ,kanal_aus_db1["aktiv"]
+            ,kanal_aus_db1["microcheck"]
+            ,kanal_aus_db1["muss_geprueft_werden"]
+         ])
     
     set_sql_data("""CREATE TABLE T004_ablauf 
                  (id INTEGER PRIMARY KEY   AUTOINCREMENT
@@ -139,10 +171,11 @@ def api_stueckerzeugen():
 ########################################################################################################################
 @app.route("/t002_db1_kanaele") 
 def t002_db1_kanaele():
-    top = request.args.get('top') if 'top' in request.args else ''
-    bottom = request.args.get('bottom') if 'bottom' in request.args else ''
+    global aktuelles_Stueck_txt
+    
+    return render_template('t002_kanaele.html', api='/api/db1/', aktuelles_Stueck_txt=aktuelles_Stueck_txt)
 
-    return render_template('t002_kanaele.html', api='/api/db1/', bottom=bottom, jsfile="t002_kanaele")
+
 ########################################################################################################################
 
 @app.route("/api/db1/kanaele",methods = ['POST'])
@@ -187,10 +220,9 @@ def api_db1_kanal_save():
 ########################################################################################################################
 @app.route("/t002_kanaele") 
 def t002_kanaele():
-    top = request.args.get('top') if 'top' in request.args else ''
-    bottom = request.args.get('bottom') if 'bottom' in request.args else ''
+    global aktuelles_Stueck_txt
 
-    return render_template('t002_kanaele.html', api='/api/', bottom=bottom, jsfile="t002_kanaele")
+    return render_template('t002_kanaele.html', api='/api/', aktuelles_Stueck_txt=aktuelles_Stueck_txt)
 ########################################################################################################################
 
 @app.route("/api/kanaele",methods = ['POST'])
@@ -235,10 +267,9 @@ def api_kanal_save():
 ########################################################################################################################
 @app.route("/t004_ablauf") 
 def t004_ablauf():
-    top = request.args.get('top') if 'top' in request.args else ''
-    bottom = request.args.get('bottom') if 'bottom' in request.args else ''
+    global aktuelles_Stueck_txt
 
-    return render_template('t004_ablauf.html', top=top, bottom=bottom)
+    return render_template('t004_ablauf.html', aktuelles_Stueck_txt=aktuelles_Stueck_txt)
 
 @app.route("/api/ablauf",methods = ['POST'])
 def api_ablauf():
@@ -313,10 +344,8 @@ def api_ablauf_toggle():
 ########################################################################################################################
 @app.route("/t005_produktion") 
 def t005_produktion():
-    top = request.args.get('top') if 'top' in request.args else ''
-    bottom = request.args.get('bottom') if 'bottom' in request.args else ''
-
-    return render_template('t005_produktion.html', top=top, bottom=bottom)
+    global aktuelles_Stueck_txt
+    return render_template('t005_produktion.html', aktuelles_Stueck_txt=aktuelles_Stueck_txt)
 
 
 @app.route("/api/ablauf_akt_punkt",methods = ['POST'])
@@ -373,10 +402,9 @@ def api_maskieren_toggle():
 ########################################################################################################################
 @app.route("/t006_microcheck") 
 def t006_microcheck():
-    top = request.args.get('top') if 'top' in request.args else ''
-    bottom = request.args.get('bottom') if 'bottom' in request.args else ''
+    global aktuelles_Stueck_txt
 
-    return render_template('t006_microcheck.html', top=top, bottom=bottom)
+    return render_template('t006_microcheck.html', aktuelles_Stueck_txt=aktuelles_Stueck_txt)
 
 @app.route("/api/microcheck_toggle",methods = ['POST'])
 def api_microcheck_toggle():
@@ -426,8 +454,8 @@ def set_sql_data(sql,para):
     con.commit()
     return {}
 
-aktuelles_Stueck = json.loads(get_my_jsonified_data_DB1("select max(id) id from T001_stueck;"))[0]["id"]
-aktuelles_Stueck_txt = json.loads(get_my_jsonified_data_DB1("select max(id) id from T001_stueck;"))[0]["id"]
+aktuelles_Stueck = json.loads(get_my_jsonified_data_DB1("select value id from T000_status where key = 'akt_stueck_id';"))[0]["id"]
+aktuelles_Stueck_txt = json.loads(get_my_jsonified_data_DB1("select beschreibung_1 id from T001_stueck where id = "+aktuelles_Stueck+";") )[0]["id"]
  
 
 if __name__ == '__main__':
