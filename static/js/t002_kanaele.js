@@ -4,7 +4,7 @@ kanaele_lesen()
 function kanaele_lesen()
 {
   $.ajax({
-    url: "api/kanaele", //the page containing php script
+    url: api +"kanaele", //the page containing php script
     type: "POST", //request type
     dataType: 'json',
     headers: { 'Content-Type': 'application/json' },
@@ -29,7 +29,7 @@ function save(id,midi_kanal,midi_befehl,maskierung,frequenz,beschreibung_1,besch
 {
   
   $.ajax({
-    url: "api/kanal_save", //the page containing php script
+    url: api +"kanal_save", //the page containing php script
     type: "POST", //request type
     dataType: 'json',
     headers: { 'Content-Type': 'application/json' },
