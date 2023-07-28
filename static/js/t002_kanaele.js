@@ -14,7 +14,7 @@ function kanaele_lesen()
       success:function(result){
         cardausgeben(result, "ausgabe")
         console.log(result);
-       
+        
       
     }
     ,error: function(result){
@@ -101,22 +101,24 @@ function cardausgeben(DatenAusgabe, AusgabeID) {
               let fl = $('<label for="frequenz" class="form-label">Frequenz</label>')
               let f = $('<input type="text" class="form-control" id="frequenz" name="frequenz">')
               f.val(m.frequenz)
-              let div = $('<div class="form-check form-switch"></div')
-              let ma = $('<input class="form-check-input" type="checkbox" role="switch" id="maskierung">')
-              let mal = $('<label class="form-check-label" for="maskierung">Kanal Maskiert</label>')
-              int_to_on(m.maskierung, ma)
-              div.append(mal,ma)
-
-
+              
+              
               let gl= $('<label for="gruppe" class="form-label">Gruppe:</label>')
               let g = $('<input type="number" class="form-control" id="gruppe" name="gruppe" min="1" max="16">')
               g.val(m.gruppe)
-
+              
               let div1 = $('<div class="form-check form-switch"></div')
               let ma1 = $('<input class="form-check-input" type="checkbox" role="switch" id="aktiv">')
               let mal1 = $('<label class="form-check-label" for="aktiv">Kanal aktiv</label>')
               int_to_on(m.aktiv, ma1)
               div1.append(mal1,ma1)
+
+              let div = $('<div class="form-check form-switch"></div')
+              let ma = $('<input class="form-check-input" type="checkbox" role="switch" id="maskierung">')
+              let mal = $('<label class="form-check-label" for="maskierung">Kanal Maskiert</label>')
+              int_to_on(m.maskierung, ma)
+              div.append(mal,ma)
+              
 
               let div2 = $('<div class="form-check form-switch"></div')
               let ma2 = $('<input class="form-check-input" type="checkbox" role="switch" id="muss_geprueft_werden">')
@@ -135,7 +137,7 @@ function cardausgeben(DatenAusgabe, AusgabeID) {
                 save(m.id, mk.val(),mb.val(),switch_to_int(ma),f.val(),b1.val(),b2.val(), g.val(), switch_to_int(ma1), switch_to_int(ma2), switch_to_int(ma3))
                 
               })
-              cb.append(k,b1l, b1, b2l, b2, mbl,mb, mkl,mk,fl, f,div, gl,g, div1,div2,div3, $('<br>'), B)
+              cb.append(k,b1l, b1, b2l, b2, mbl,mb, mkl,mk,fl, f, gl,g,div1, div,div2, div3,$('<br>'), B)
             })
 
             let cont = $('<p class="card-text"></p>')

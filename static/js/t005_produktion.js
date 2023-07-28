@@ -41,10 +41,11 @@ function ablauf_lesen(ablauf_id)
   } );
 
 }
-function send(api)
+szeneliste()
+function szeneliste()
 {
   $.ajax({
-    url: "api/" +api, //the page containing php script
+    url: "api/szeneliste", //the page containing php script
     type: "POST", //request type
     dataType: 'json',
     headers: { 'Content-Type': 'application/json' },
@@ -52,9 +53,35 @@ function send(api)
        
     }),
       success:function(result){
+        szenelisteausgeben(result, "szeneliste")
+
+
+
+        
+      
+    }
+    ,error: function(result){
+      
+      console.log(result);
+    }           
+  } );
+
+}
+function send(api,ablauf_id)
+{
+  $.ajax({
+    url: "api/" +api, //the page containing php script
+    type: "POST", //request type
+    dataType: 'json',
+    headers: { 'Content-Type': 'application/json' },
+    data: JSON.stringify({
+      ablauf_id: ablauf_id
+    }),
+      success:function(result){
         cardausgeben(result, "ausgabe")
         console.log(result);
         maskierung_lesen()
+        szeneliste()
     }
     ,error: function(result){
       
@@ -294,38 +321,8 @@ function cardausgeben(DatenAusgabe, AusgabeID) {
 
             let cb = $('<div class="card-body"></div>')
             let ct = $('<h5 class="card-title"></h5>')
-            ct.html(m.ablauf_id + " - Stichwort: "+m.stichwort)
-            // let pen = $('<i class="bi bi-pen"></i>')
-            // pen.click(function(){
-            //   let sl= $('<br><label for="stichwort" class="form-label">Stichwort:</label>')
-            //   let s = $('<input type="text" class="form-control" id="stichwort" name="stichwort">')
-            //   s.val(m.stichwort)
-              
-            //   let B = $('<button type="submit" class="btn btn-primary">Save</button>')
-            //   B.click(function(){
-            //     save(m.id, s.val())
-                
-            //     ct.html("Stichwort: "+s.val() + ' <i class="bi bi-pen"></i>')
-            //     cb.append(ct)
-            //   })
-            //   cb.append(sl,s,  B)
-            // })
-            // let up = $('<i class="bi bi-arrow-bar-up"></i>')
-            // up.click(function(){
-            //   move(m.id,-1)
-            // })
-            // let down = $('<i class="bi bi-arrow-bar-down"></i>')
-            // down.click(function(){
-            //   move(m.id,1)
-            // })
-            // let add = $('<i class="bi bi-arrow-down-square"></i>')
-            // add.click(function(){
-            //   add_(m.id)
-            // })
+            ct.html(m.ablauf_id + " - Szene: " + m.szene + " - Stichwort: "+m.stichwort)
 
-            // ct.append(pen, add)
-            // if (m.ablauf_id > 1) ct.append(up)
-            // if (m.ablauf_id < DatenAusgabe.length) ct.append(down)
             cb.append(ct)
             j = JSON.parse(m.aktion)
 
@@ -391,6 +388,42 @@ function cardausgeben(DatenAusgabe, AusgabeID) {
             c.append(cb)
 
           container.append(c)  
+          
+
+      });
+  }
+}
+
+
+
+
+
+
+function szenelisteausgeben(DatenAusgabe, AusgabeID) {
+  var container = $('#'+ AusgabeID);
+  container.empty();
+  if (container) {
+
+      
+      DatenAusgabe.forEach(function(m, i) {
+
+
+      
+          //################ Jede Zeile #################
+      
+            
+            let s = $('<p></p>')
+            s.html(m.ablauf_id + ' ' + m.szene + ' <i class="bi bi-arrow-right-short"></i>')
+            if (m.ablauf_id == m.akt_ablauf)
+            {s.css("background-color",'#00487d')};
+            
+
+            s.click(function(){
+
+              send('ablauf_produktion_gehezu', m.ablauf_id)
+            })
+            
+          container.append(s)  
           
 
       });

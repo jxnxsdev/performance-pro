@@ -84,7 +84,7 @@ function neu()
   } );
 }
 
-function save(id,stichwort)
+function save(id,stichwort,szene)
 {
   
   $.ajax({
@@ -95,7 +95,7 @@ function save(id,stichwort)
     data: JSON.stringify({
                 id: id
                 , stichwort: stichwort
-                
+                , szene: szene
     }),
       success:function(result){
         cardausgeben(result, "ausgabe")
@@ -198,21 +198,25 @@ function cardausgeben(DatenAusgabe, AusgabeID) {
 
             let cb = $('<div class="card-body"></div>')
             let ct = $('<h5 class="card-title"></h5>')
-            ct.html(m.ablauf_id + " - Stichwort: "+m.stichwort)
+            ct.html(m.ablauf_id + " - Szene: " + m.szene + " - Stichwort: "+m.stichwort)
             let pen = $('<i class="bi bi-pen"></i>')
             pen.click(function(){
+              let szl= $('<br><label for="szene" class="form-label">Szene:</label>')
+              let sz = $('<input type="text" class="form-control" id="szene" name="szene">')
+              sz.val(m.szene)
+              
               let sl= $('<br><label for="stichwort" class="form-label">Stichwort:</label>')
               let s = $('<input type="text" class="form-control" id="stichwort" name="stichwort">')
               s.val(m.stichwort)
               
               let B = $('<button type="submit" class="btn btn-primary">Save</button>')
               B.click(function(){
-                save(m.id, s.val())
+                save(m.id, s.val(), sz.val())
                 
                 ct.html("Stichwort: "+s.val() + ' <i class="bi bi-pen"></i>')
                 cb.append(ct)
               })
-              cb.append(sl,s,  B)
+              cb.append(szl, sz, sl,s,  B)
             })
             let up = $('<i class="bi bi-arrow-bar-up"></i>')
             up.click(function(){

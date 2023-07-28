@@ -53,12 +53,16 @@ def api_stueckerzeugen():
     
 
     set_sql_data("CREATE TABLE T002_kanaele (id INTEGER PRIMARY KEY ,  midi_kanal int, maskierung int ,midi_befehl char(4), frequenz varchar(40),  beschreibung_1 varchar(300), beschreibung_2 varchar(300), gruppe int, aktiv int,microcheck int, muss_geprueft_werden int )",[])
-#    set_sql_data("CREATE TABLE T003_besetzung (id INTEGER PRIMARY KEY   AUTOINCREMENT, kanal_nr int, beschreibung_1 varchar(300), beschreibung_2 varchar(300) , farbe char(6), gruppe int)",[])
+
     for i in range (1 , 129):
         set_sql_data("insert into T002_kanaele ( id , midi_kanal ,maskierung ,midi_befehl,frequenz,beschreibung_1,beschreibung_2, gruppe, aktiv,microcheck, muss_geprueft_werden) values (?,?,0,'84','','','',0,0,0,0) ",[i,i])
- #       set_sql_data("insert into T003_besetzung ( kanal_nr , beschreibung_1  ) values (?,'') ",[i])
     
-    set_sql_data("CREATE TABLE T004_ablauf (id INTEGER PRIMARY KEY   AUTOINCREMENT, ablauf_id int, stichwort varchar(1000), aktion varchar(8000) )",[])
+    set_sql_data("""CREATE TABLE T004_ablauf 
+                 (id INTEGER PRIMARY KEY   AUTOINCREMENT
+                 , ablauf_id int
+                 , stichwort varchar(1000)
+                 , szene varchar(1000)
+                 , aktion varchar(8000) )""",[])
 
 
 
@@ -74,10 +78,12 @@ def t002_kanaele():
     bottom = request.args.get('bottom') if 'bottom' in request.args else ''
 
     return render_template('t002_kanaele.html', top=top, bottom=bottom, jsfile="t002_kanaele")
+########################################################################################################################
 
 @app.route("/api/kanaele",methods = ['POST'])
 def api_kanaele():
     return get_my_jsonified_data('select * from T002_kanaele order by id')
+########################################################################################################################
 
 @app.route("/api/kanal_save",methods = ['POST'])
 def api_kanal_save():
@@ -108,12 +114,8 @@ def api_kanal_save():
                    , request.get_json()["id"]
                    ])
     return get_my_jsonified_data('select * from T002_kanaele order by id')
+########################################################################################################################
 
-def on_to_int(x):
-    if str(x) == 'on' or str(x) == '1':
-        return 1
-    else:
-        return 0
 #######################################################################################################################
 ############################################## Ablauf
 ########################################################################################################################
@@ -131,14 +133,14 @@ def api_ablauf():
 @app.route("/api/ablauf_neu",methods = ['POST'])
 def api_ablauf_neu():
     result = get_my_jsonified_data('select id, 0 as value from T002_kanaele order by id')
-    set_sql_data("insert into t004_ablauf (ablauf_id, aktion, stichwort) values ((select ifnull(max(ablauf_id)+1,1) from t004_ablauf),?,'' )" ,[result] )
+    set_sql_data("insert into t004_ablauf (ablauf_id, aktion, stichwort,szene) values ((select ifnull(max(ablauf_id)+1,1) from t004_ablauf),?,'','' )" ,[result] )
     return get_my_jsonified_data('select * from t004_ablauf order by ablauf_id')
 
 
 @app.route("/api/ablauf_save",methods = ['POST'])
 def api_ablauf_save():
-    set_sql_data("update t004_ablauf set stichwort = ? where id = ?",
-                 [request.get_json()["stichwort"],request.get_json()["id"]])
+    set_sql_data("update t004_ablauf set stichwort = ?,szene = ? where id = ?",
+                 [request.get_json()["stichwort"],request.get_json()["szene"],request.get_json()["id"]])
     return get_my_jsonified_data('select * from t004_ablauf order by ablauf_id')
 
 @app.route("/api/ablauf_move",methods = ['POST'])
@@ -168,7 +170,7 @@ def api_ablauf_add():
                 [ablauf_id ])
     ## neu einfügen in Lücke
     result = get_my_jsonified_data('select id, 0 as value from T002_kanaele order by id')
-    set_sql_data("insert into t004_ablauf (ablauf_id, aktion, stichwort) values (?,?,'' )" ,[ablauf_id + 1, result] )
+    set_sql_data("insert into t004_ablauf (ablauf_id, aktion, stichwort ,szene) values (?,?,'','' )" ,[ablauf_id + 1, result] )
     return get_my_jsonified_data('select * from t004_ablauf order by ablauf_id')
 
 
@@ -205,11 +207,17 @@ def t005_produktion():
 
 @app.route("/api/ablauf_akt_punkt",methods = ['POST'])
 def ablauf_akt_punkt():
-    return get_my_jsonified_data_DB1("select * from t000_status where key = 'akt_ablauf'")
+    return get_my_jsonified_data_DB1("select * from t000_status where key = 'akt_ablauf' ")
+
+@app.route("/api/szeneliste",methods = ['POST'])
+def api_szeneliste():
+    akt_ablauf = str(int(json.loads(get_my_jsonified_data_DB1("select * from t000_status where key = 'akt_ablauf'"))[0]["value"]))
+    return get_my_jsonified_data('select ablauf_id,szene , ' + akt_ablauf + ' akt_ablauf from t004_ablauf  order by ablauf_id ')
+
 
 @app.route("/api/ablauf_produktion",methods = ['POST'])
 def api_ablauf_produktion():
-    return get_my_jsonified_data('select * from t004_ablauf where ablauf_id >= '+request.get_json()["ablauf_id"]+' order by ablauf_id',)
+    return get_my_jsonified_data('select * from t004_ablauf where ablauf_id >= '+request.get_json()["ablauf_id"]+' order by ablauf_id LIMIT 4')
 
 @app.route("/api/ablauf_produktion_weiter",methods = ['POST'])
 def api_ablauf_produktion_weiter():
@@ -223,6 +231,11 @@ def api_ablauf_produktion_zurueck():
     set_sql_data_DB1("update t000_status set value = ? where key = 'akt_ablauf'",[akt_ablauf ])
     return get_my_jsonified_data('select * from t004_ablauf where ablauf_id >= '+ akt_ablauf + ' order by ablauf_id LIMIT 4',)
 
+@app.route("/api/ablauf_produktion_gehezu",methods = ['POST'])
+def api_ablauf_produktion_gehezu():
+    akt_ablauf = str(request.get_json()["ablauf_id"])
+    set_sql_data_DB1("update t000_status set value = ? where key = 'akt_ablauf'",[akt_ablauf ])
+    return get_my_jsonified_data('select * from t004_ablauf where ablauf_id >= '+ akt_ablauf + ' order by ablauf_id LIMIT 4',)
 
 
 
@@ -257,6 +270,12 @@ def api_microcheck_toggle():
 
 
 #######################################################################################################################
+def on_to_int(x):
+    if str(x) == 'on' or str(x) == '1':
+        return 1
+    else:
+        return 0
+
 def get_my_jsonified_data_DB1(sql):
     cnx = sqlite3.connect(data_folder / "db" / "db.db")
     data = pd.read_sql_query(sql, cnx).to_json(orient ='records')
