@@ -5,7 +5,6 @@ from datetime import datetime
 import pandas as pd
 from pathlib import Path, PureWindowsPath
 import sys
-
 app = Flask(__name__)
 
 if sys.platform == 'win32':
@@ -14,6 +13,59 @@ else:
     data_folder = Path(__file__).parents[0]
 
 
+########################################################################################################################
+############################################## Initialisierung der DB1
+########################################################################################################################
+@app.route("/create_db",methods = ['GET'])
+def new_db0():
+    import shutil
+    import os
+    jetzt = datetime.now()
+    newpath = jetzt.strftime("%Y%m%d_%H%M%S")
+    os.mkdir(data_folder / "db" / newpath)
+    
+
+    
+    file_source = data_folder / "db"
+    file_destination = data_folder / "db" / newpath 
+    
+    get_files = os.listdir(file_source)
+    
+    for g in get_files:
+        if '.db' in g:
+            shutil.move(file_source / g, file_destination)
+    
+    set_sql_data_DB1("""CREATE TABLE T000_status 
+                    (key varchar(255) PRIMARY KEY 
+                    , value varchar(255) )
+                    """,[])
+
+    set_sql_data_DB1("""CREATE TABLE T001_stueck 
+                    (id INTEGER PRIMARY KEY   AUTOINCREMENT
+                    , beschreibung_1 varchar(255)
+                    , beschreibung_2 varchar(255)
+                    , jahr char(4) )
+                    """,[])
+
+    set_sql_data_DB1("""CREATE TABLE T002_kanaele 
+                    (id INTEGER PRIMARY KEY 
+                    , midi_kanal int
+                    , maskierung int 
+                    , midi_befehl char(4)
+                    , frequenz varchar(40)
+                    , beschreibung_1 varchar(300)
+                    , beschreibung_2 varchar(300)
+                    , gruppe int
+                    , aktiv int
+                    , microcheck int
+                    , muss_geprueft_werden int 
+                    )""",[])
+    for i in range (1 , 129):
+        set_sql_data_DB1("insert into T002_kanaele ( id , midi_kanal ,maskierung ,midi_befehl,frequenz,beschreibung_1,beschreibung_2, gruppe, aktiv,microcheck, muss_geprueft_werden) values (?,?,0,'84','','','',0,0,0,0) ",[i,i])
+
+    global aktuelles_Stueck
+    aktuelles_Stueck = 1
+    return {"aktuelles_Stueck":"1"}
 
 ########################################################################################################################
 ############################################## Stücke
@@ -21,10 +73,9 @@ else:
 @app.route("/")
 @app.route("/t001_stueck") 
 def t001_stueck():
-    top = request.args.get('top') if 'top' in request.args else ''
-    bottom = request.args.get('bottom') if 'bottom' in request.args else ''
+    global aktuelles_Stueck_txt
 
-    return render_template('t001_stuecke.html', top=top, bottom=bottom)
+    return render_template('t001_stuecke.html', aktuelles_Stueck_txt=aktuelles_Stueck_txt)
 
 @app.route("/api/stuecke",methods = ['POST'])
 def api_stuecke():
@@ -35,6 +86,8 @@ def stueckauswahl():
     global aktuelles_Stueck
     aktuelles_Stueck = request.get_json()["id"]
     set_sql_data_DB1("REPLACE into T000_status (value, key) values( ? , 'akt_stueck_id');",[request.get_json()["id"]])
+    set_sql_data_DB1("REPLACE into T000_status (value, key) values( 1 , 'akt_ablauf');",[])
+    
     return get_my_jsonified_data_DB1("select * ,(select 'aktiv' from T000_status t0 where t0.key = 'akt_stueck_id' and t0.value = t1.id) as aktiv from T001_stueck t1 order by id desc;")
 
 @app.route("/api/stueck_save",methods = ['POST'])
@@ -52,7 +105,19 @@ def api_stueckerzeugen():
     aktuelles_Stueck = json.loads(get_my_jsonified_data_DB1("select max(id) id from T001_stueck;"))[0]["id"]
     
 
-    set_sql_data("CREATE TABLE T002_kanaele (id INTEGER PRIMARY KEY ,  midi_kanal int, maskierung int ,midi_befehl char(4), frequenz varchar(40),  beschreibung_1 varchar(300), beschreibung_2 varchar(300), gruppe int, aktiv int,microcheck int, muss_geprueft_werden int )",[])
+    set_sql_data("""CREATE TABLE T002_kanaele 
+                 (id INTEGER PRIMARY KEY 
+                 , midi_kanal int
+                 , maskierung int 
+                 , midi_befehl char(4)
+                 , frequenz varchar(40)
+                 , beschreibung_1 varchar(300)
+                 , beschreibung_2 varchar(300)
+                 , gruppe int
+                 , aktiv int
+                 , microcheck int
+                 , muss_geprueft_werden int 
+                 )""",[])
 
     for i in range (1 , 129):
         set_sql_data("insert into T002_kanaele ( id , midi_kanal ,maskierung ,midi_befehl,frequenz,beschreibung_1,beschreibung_2, gruppe, aktiv,microcheck, muss_geprueft_werden) values (?,?,0,'84','','','',0,0,0,0) ",[i,i])
@@ -70,6 +135,54 @@ def api_stueckerzeugen():
 
 
 ########################################################################################################################
+############################################## Kanäle IN DER DB 1!!!!!!!!!!!!!!!!
+########################################################################################################################
+@app.route("/t002_db1_kanaele") 
+def t002_db1_kanaele():
+    top = request.args.get('top') if 'top' in request.args else ''
+    bottom = request.args.get('bottom') if 'bottom' in request.args else ''
+
+    return render_template('t002_kanaele.html', api='/api/db1/', bottom=bottom, jsfile="t002_kanaele")
+########################################################################################################################
+
+@app.route("/api/db1/kanaele",methods = ['POST'])
+def api_db1_kanaele():
+    return get_my_jsonified_data_DB1('select * from T002_kanaele order by id')
+########################################################################################################################
+
+@app.route("/api/db1/kanal_save",methods = ['POST'])
+def api_db1_kanal_save():
+    set_sql_data_DB1("""update T002_kanaele set 
+                  midi_kanal = ? 
+                 , maskierung = ?
+                 , midi_befehl = ?
+                 , frequenz = ?
+                 , beschreibung_1 = ?
+                 , beschreibung_2 = ?
+                 , gruppe = ?
+                 , aktiv = ?
+                 , muss_geprueft_werden = ?
+                 , microcheck = ?
+                 where id = ?"""
+                 
+                 ,[
+                     request.get_json()["midi_kanal"]
+                   , on_to_int(request.get_json()["maskierung"])
+                   , request.get_json()["midi_befehl"]
+                   , request.get_json()["frequenz"]
+                   , request.get_json()["beschreibung_1"]
+                   , request.get_json()["beschreibung_2"]
+                   , request.get_json()["gruppe"]
+                   , on_to_int(request.get_json()["aktiv"])
+                   , on_to_int(request.get_json()["muss_geprueft_werden"])
+                   , on_to_int(request.get_json()["microcheck"])
+                   , request.get_json()["id"]
+                   ])
+    return get_my_jsonified_data_DB1('select * from T002_kanaele order by id')
+########################################################################################################################
+
+
+########################################################################################################################
 ############################################## Kanäle
 ########################################################################################################################
 @app.route("/t002_kanaele") 
@@ -77,7 +190,7 @@ def t002_kanaele():
     top = request.args.get('top') if 'top' in request.args else ''
     bottom = request.args.get('bottom') if 'bottom' in request.args else ''
 
-    return render_template('t002_kanaele.html', top=top, bottom=bottom, jsfile="t002_kanaele")
+    return render_template('t002_kanaele.html', api='/api/', bottom=bottom, jsfile="t002_kanaele")
 ########################################################################################################################
 
 @app.route("/api/kanaele",methods = ['POST'])
@@ -115,6 +228,7 @@ def api_kanal_save():
                    ])
     return get_my_jsonified_data('select * from T002_kanaele order by id')
 ########################################################################################################################
+
 
 #######################################################################################################################
 ############################################## Ablauf
@@ -222,13 +336,18 @@ def api_ablauf_produktion():
 @app.route("/api/ablauf_produktion_weiter",methods = ['POST'])
 def api_ablauf_produktion_weiter():
     akt_ablauf = str(int(json.loads(get_my_jsonified_data_DB1("select * from t000_status where key = 'akt_ablauf'"))[0]["value"]) +1)
+    max_ablauf = str(int(json.loads(get_my_jsonified_data("select max(ablauf_id)  a from t004_ablauf"))[0]["a"]) )
+    if int(akt_ablauf) >= int(max_ablauf):
+        akt_ablauf = max_ablauf
     set_sql_data_DB1("update t000_status set value = ? where key = 'akt_ablauf'",[akt_ablauf ])
     return get_my_jsonified_data('select * from t004_ablauf where ablauf_id >= '+ akt_ablauf  + ' order by ablauf_id LIMIT 4',)
 
 @app.route("/api/ablauf_produktion_zurueck",methods = ['POST'])
 def api_ablauf_produktion_zurueck():
     akt_ablauf = str(int(json.loads(get_my_jsonified_data_DB1("select * from t000_status where key = 'akt_ablauf'"))[0]["value"]) -1)
-    set_sql_data_DB1("update t000_status set value = ? where key = 'akt_ablauf'",[akt_ablauf ])
+    if akt_ablauf != '0':
+        set_sql_data_DB1("update t000_status set value = ? where key = 'akt_ablauf'",[akt_ablauf ])
+        akt_ablauf = '1'
     return get_my_jsonified_data('select * from t004_ablauf where ablauf_id >= '+ akt_ablauf + ' order by ablauf_id LIMIT 4',)
 
 @app.route("/api/ablauf_produktion_gehezu",methods = ['POST'])
@@ -307,17 +426,9 @@ def set_sql_data(sql,para):
     con.commit()
     return {}
 
-        
-@app.route("/create_db")
-def db_create():
-    set_sql_data_DB1("CREATE TABLE T001_stueck (id INTEGER PRIMARY KEY   AUTOINCREMENT, beschreibung_1 varchar(255), beschreibung_2 varchar(255), jahr char(4) )",[])
-    set_sql_data_DB1("CREATE TABLE T000_status (key varchar(255) PRIMARY KEY , value varchar(255) )",[])
-
-    return 'das hat funktioniert'
-
 aktuelles_Stueck = json.loads(get_my_jsonified_data_DB1("select max(id) id from T001_stueck;"))[0]["id"]
-
-
+aktuelles_Stueck_txt = json.loads(get_my_jsonified_data_DB1("select max(id) id from T001_stueck;"))[0]["id"]
+ 
 
 if __name__ == '__main__':
     import os
