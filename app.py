@@ -72,7 +72,13 @@ def new_db0():
 ########################################################################################################################
 ############################################## Stücke
 ########################################################################################################################
-@app.route("/")
+
+@app.route("/") 
+def impressum():
+    global aktuelles_Stueck_txt
+
+    return render_template('impressum.html', aktuelles_Stueck_txt=aktuelles_Stueck_txt)
+
 @app.route("/t001_stueck") 
 def t001_stueck():
     global aktuelles_Stueck_txt
@@ -87,7 +93,7 @@ def api_stuecke():
 def stueckauswahl():
     global aktuelles_Stueck, aktuelles_Stueck_txt
     aktuelles_Stueck = request.get_json()["id"]
-    aktuelles_Stueck_txt = json.loads(get_my_jsonified_data_DB1("select beschreibung_1 id from T001_stueck where id = "+aktuelles_Stueck+";") )[0]["id"]
+    aktuelles_Stueck_txt = json.loads(get_my_jsonified_data_DB1("select beschreibung_1 id from T001_stueck where id = "+str(aktuelles_Stueck)+";") )[0]["id"]
     set_sql_data_DB1("REPLACE into T000_status (value, key) values( ? , 'akt_stueck_id');",[request.get_json()["id"]])
     set_sql_data_DB1("REPLACE into T000_status (value, key) values( 1 , 'akt_ablauf');",[])
     
@@ -105,9 +111,9 @@ def api_stueck_save():
 @app.route("/api/stueckerzeugen",methods = ['POST'])
 def api_stueckerzeugen():
     global aktuelles_Stueck
-
+    temp = aktuelles_Stueck
     set_sql_data_DB1("insert into T001_stueck (beschreibung_1, beschreibung_2, jahr) values( 'NEU' , 'NEU' , '" +datetime.now().strftime("%Y")+"' );",[])
-    aktuelles_Stueck = json.loads(get_my_jsonified_data_DB1("select max(id) id from T001_stueck" ) )[0]["id"]
+    aktuelles_Stueck = str(json.loads(get_my_jsonified_data_DB1("select max(id) id from T001_stueck" ) )[0]["id"])
 
     set_sql_data("""CREATE TABLE T002_kanaele 
                  (id INTEGER PRIMARY KEY 
@@ -124,10 +130,9 @@ def api_stueckerzeugen():
                  )""",[])
 
 
-    kanaele_aus_db1 = get_my_jsonified_data_DB1("select  id , midi_kanal ,maskierung ,midi_befehl,frequenz,beschreibung_1,beschreibung_2, gruppe, aktiv,microcheck, muss_geprueft_werden from T002_kanaele order by 1")
+    kanaele_aus_db1 = json.loads(get_my_jsonified_data_DB1("select  id , midi_kanal ,maskierung ,midi_befehl,frequenz,beschreibung_1,beschreibung_2, gruppe, aktiv,microcheck, muss_geprueft_werden from T002_kanaele order by 1"))
     for kanal_aus_db1 in kanaele_aus_db1:
-        print(kanal_aus_db1)
-        exit()
+                
         set_sql_data("""insert into T002_kanaele 
         ( id 
         , midi_kanal 
@@ -162,7 +167,7 @@ def api_stueckerzeugen():
                  , aktion varchar(8000) )""",[])
 
 
-
+    aktuelles_Stueck = temp
     return api_stuecke()
 
 
@@ -455,7 +460,7 @@ def set_sql_data(sql,para):
     return {}
 
 aktuelles_Stueck = json.loads(get_my_jsonified_data_DB1("select value id from T000_status where key = 'akt_stueck_id';"))[0]["id"]
-aktuelles_Stueck_txt = json.loads(get_my_jsonified_data_DB1("select beschreibung_1 id from T001_stueck where id = "+aktuelles_Stueck+";") )[0]["id"]
+aktuelles_Stueck_txt = json.loads(get_my_jsonified_data_DB1("select beschreibung_1 id from T001_stueck where id = "+str(aktuelles_Stueck)+";") )[0]["id"]
  
 
 if __name__ == '__main__':

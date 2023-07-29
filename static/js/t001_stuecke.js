@@ -1,29 +1,4 @@
 
-/* window.addEventListener('keydown', function(event){ 
-  switch(event.keyCode) { 
-    case 112: f1(); break; 
-    case 113: f2(); break; 
-    case 114: f3(); break; 
-    case 115: f4(); break; 
-    case 116: f5(); break; 
-    case 117: f6(); break; 
-    case 118: f7(); break; 
-    case 119: f8(); break; 
-    case 120: f9(); break; 
-    case 121: f10(); break; 
-    case 122: f11(); break; 
-    case 123: f12(); break; 
-  } 
-  event.preventDefault(); 
-}); 
-
-function f1() { 
-  // mein Code für die Taste F1 
-  console.log("F1")
-}
- */
-
-//document.getElementById("accordionFlushExample").appendChild( CreateAccordionItem());
 stueke_lesen()
 
 
@@ -169,7 +144,7 @@ let cont2 = $('<p class="card-text">Jahr'+m.jahr+'</p>')
 let B_aus = $('<button type="submit" class="btn btn-secondary">Auswahl</button>')
 B_aus.click(function(){
   stueckauswahl(m.id)
-  
+  $('#aktuelles_Stueck_txt').html(m.beschreibung_1)
 })
 cb.append(a,ct, cont1,cont2,B_aus)
 
