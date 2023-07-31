@@ -1,31 +1,61 @@
-{% include "navbar.html" %}
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="">
+  <meta name="author" content="">
+  <link rel="icon" href="/docs/4.0/assets/img/favicons/favicon.ico">
 
+  <title>Cover Template for Bootstrap</title>
 
-<div class="container">
-    <div class="row justify-content-md-center">
-        <div class="col-12">
+  <link rel="canonical" href="https://getbootstrap.com/docs/4.0/examples/cover/">
 
-            <h1 class="cover-heading"><img src="{{ url_for('static', filename='img/logo.png') }}" class="img-thumbnail" ></h1>
-    <p class="lead">Audio Steuerungssoftware für Digitale Mischpulte für das Theater.</p>
-    <p class="lead">
+  <!-- Bootstrap core CSS -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='mdb.dark.min.css') }}">
+
+  <!-- Custom styles for this template -->
+
+  <link rel="stylesheet" href="{{ url_for('static', filename='cover.css') }}"> 
+</head>
+
+<body class="text-center">
+
+  <div class="cover-container d-flex h-100 p-3 mx-auto flex-column">
+
+    <header class="masthead mb-auto">
+      <div class="inner">
         
-    </p>
+        <nav class="nav nav-masthead justify-content-center">
+          <a class="nav-link active" href="t001_stueck">Start</a>
+          <!-- <a class="nav-link active" href="create_db">neue DB Anlegen</a> -->
 
-        </div>
-    </div>
-   
-</div>
+        </nav>
+      </div>
+    </header>
+
+    <main role="main" class="inner cover">
+      <h1 class="cover-heading"><img src="{{ url_for('static', filename='img/logo.png') }}" class="img-thumbnail" width="200px"></h1>
+      <p class="lead">Audio Steuerungssoftware für Digitale Mischpulte</p>
+      <p class="lead">zur Theater produktion.</p>
+      <p class="lead">
+        <a href="t001_stueck" class="btn btn-lg btn-secondary">Start</a>
+      </p>
+    </main>
+
+    <footer class="mastfoot mt-auto">
+      <div class="inner">                                                
+        <p>(c) Michael Völker 2032 <a href="https://github.com/michi46887/PERFORMACE Pro">GitHub</a></p>
+      </div>
+    </footer>
+  </div>
 
 
+  <!-- Bootstrap core JavaScript
+  ================================================== -->
+  <!-- Placed at the end of the document so the pages load faster -->
+  <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+  <script type="text/javascript" src="{{ url_for('static', filename='jquery-3.6.0.min.js') }}"></script>
+  <script src="{{ url_for('static', filename='popper.min.js') }}"></script>
+  <script src="{{ url_for('static', filename='bootstrap.min.js') }}"></script>
 
 
-
-
-
-  <footer class="mastfoot mt-auto">
-    <div class="inner">
-      <p>(c) Michael Völker 2032 <a href="https://github.com/michi46887/perfomance_pro">GitHub</a></p>
-    </div>
-  </footer>
-
-  {% include 'footer.html' %}
+</body></html>
