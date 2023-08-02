@@ -1,25 +1,48 @@
 #https://github.com/SpotlightKid/python-rtmidi/tree/master/examples
 #https://spotlightkid.github.io/python-rtmidi/rtmidi.html#rtmidi.MidiOut
-import time
-import rtmidi
 
-midiout = rtmidi.MidiOut()
-available_ports = midiout.get_ports()
-
-print(available_ports)
-
-if available_ports:
-    midiout.open_port(1)
-else:
-    midiout.open_virtual_port("My virtual output")
-
-with midiout:
-    note_on = [0x90, 60, 112] # channel 1, middle C, velocity 112
-    note_off = [0x80, 60, 0]
-    midiout.send_message(note_on)
+#sudo apt-get install libasound2
+#sudo apt-get install libasound2-dev
+# sudo apt-get install libjack-dev
+# sudo apt-get install libjack-jackd2-dev
+# sudo apt-get intall jackd2
+# class raum:
     
-    time.sleep(0.5)
-    midiout.send_message(note_off)
-    time.sleep(0.1)
+#     def __init__(self, nr, verwendung): # Für die Initialisierung - hier werden auch die Variablen Deklariert
+#         self.nr = nr
+#         self.verwendung = verwendung
+    
+#     def __repr__(self): # Standart Ausgabe einer Classe
+#         return f"Hallo ich bin raum {self.nr} mit der Verwendung {self.verwendung}"
 
-del midiout
+# class besprechungsraum(raum): #Vererbung
+#     def __init__(self, nr, verwendung, presentationsflaeche):
+#         raum.__init__(self,nr,verwendung) # Aufruf der Basisklasse und Initialisierung damit die Variablen der Basisklasse auch vorhanden ist
+#         self.presentationsflaeche = presentationsflaeche
+
+
+def midi_ports():
+    import time
+    import rtmidi
+    midiout = rtmidi.MidiOut()
+    return midiout.get_ports()
+
+print(midi_ports())
+
+class midi:
+    
+    def __init__(self): # Für die Initialisierung - hier werden auch die Variablen Deklariert
+        import rtmidi
+        midiout = rtmidi.MidiOut()
+        return midiout.get_ports()
+        
+
+
+    # def open_port(i):
+    #     midiout.open_port(i)
+
+    # def send(control):
+    #     midiout.send_message(control)
+
+    
+#del midiout

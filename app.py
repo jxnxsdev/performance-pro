@@ -5,6 +5,7 @@ from datetime import datetime
 import pandas as pd
 from pathlib import Path, PureWindowsPath
 import sys
+import midi 
 app = Flask(__name__)
 
 if sys.platform == 'win32':
@@ -68,6 +69,35 @@ def new_db0():
     global aktuelles_Stueck_txt
     aktuelles_Stueck_txt = ''
     return {"aktuelles_Stueck":"1"}
+
+
+########################################################################################################################
+############################################## Midi Ports auswählen
+########################################################################################################################
+
+@app.route("/midi_port") 
+def midi_port():
+    global aktuelles_Stueck_txt
+
+    return render_template('t007_midi_ports.html', aktuelles_Stueck_txt=aktuelles_Stueck_txt)
+
+@app.route("/api/midi_ports",methods = ['POST'])
+def api_midi_port():
+    #print(midi.midi())
+    #import sys
+    #print(sys.version)
+    import rtmidi
+
+    #print(rtmidi.get_api_name(rtmidi.API_UNIX_JACK))
+    midiout = rtmidi.MidiOut(rtapi=rtmidi.API_UNSPECIFIED)
+    midiout.get_ports()
+    
+    # def ports():
+    #     return midiout.get_ports()
+
+    # print(ports())
+    return {}
+
 
 ########################################################################################################################
 ############################################## Stücke
@@ -459,10 +489,13 @@ def set_sql_data(sql,para):
     con.commit()
     return {}
 
-aktuelles_Stueck = json.loads(get_my_jsonified_data_DB1("select value id from T000_status where key = 'akt_stueck_id';"))[0]["id"]
-aktuelles_Stueck_txt = json.loads(get_my_jsonified_data_DB1("select beschreibung_1 id from T001_stueck where id = "+str(aktuelles_Stueck)+";") )[0]["id"]
- 
+try:
+    aktuelles_Stueck = json.loads(get_my_jsonified_data_DB1("select value id from T000_status where key = 'akt_stueck_id';"))[0]["id"]
+    aktuelles_Stueck_txt = json.loads(get_my_jsonified_data_DB1("select beschreibung_1 id from T001_stueck where id = "+str(aktuelles_Stueck)+";") )[0]["id"]
+except:
+    aktuelles_Stueck = 1
+    aktuelles_Stueck_txt = 'KEIN STÜCK'
 
 if __name__ == '__main__':
-    import os
+    app.run()
     #flask --debug --app app run
