@@ -12,8 +12,8 @@ function ports_lesen()
         
     }),
       success:function(result){
-        cardausgeben(result, "ausgabe")
         console.log(result);
+        cardausgeben(result, "ausgabe")
        
 
 
@@ -32,42 +32,46 @@ function ports_lesen()
 function cardausgeben(DatenAusgabe, AusgabeID) {
   var container = $('#'+ AusgabeID);
   container.empty();
+  
   if (container) {
 
       
       DatenAusgabe.forEach(function(m, i) {
 
 
-      
+        console.log(m)
           //################ Jede Zeile #################
-          if (m.aktiv == 1)
-          {
+
+
+          let a
+          if (m.aktiv){
+            a = $('<i class="fas fa-bell"></i><span class="badge rounded-pill badge-notification bg-danger">aktiv</span>')
+          }
+          else
+          { a = $('')}
+
             let c = $('<div class="card" style="width: 90%; margin:20px"></div>')
             let cb = $('<div class="card-body"></div>')
             let ct = $('<h5 class="card-title"></h5>')
             
-            ct.html("Kanal: "+m.id )
+            ct.html("Port: "+m.id )
             
             
             cb.append(ct 
-              ,$('<p class="card-text">'+m.beschreibung_1+ ' ' +m.beschreibung_2 +'</p>')
+              ,$('<p class="card-text">'+m.port +'</p>')
               
-              ,$('<p class="card-text">Frequenz: '+m.frequenz+'</p>')
-              
-              // ,$('<p class="card-text">Maskiert: '+m.maskierung+'</p>')
-              // ,$('<p class="card-text">Aktiv: '+m.aktiv+'</p>')
+              ,a
               )
               
-              if (m.microcheck == 1)c.css("background-color",'#008f00');
-
               cb.click(function(){
                 $.ajax({
-                  url: "api/microcheck_toggle", //the page containing php script
+                  url: "api/midi_ports_select", //the page containing php script
                   type: "POST", //request type
                   dataType: 'json',
                   headers: { 'Content-Type': 'application/json' },
                   data: JSON.stringify({
                     id: m.id
+                    ,port: m.port
                     
                   }),
                   success:function(result){
@@ -86,7 +90,7 @@ function cardausgeben(DatenAusgabe, AusgabeID) {
             c.append(cb)
 
           container.append(c)  
-            }
+            
 
       });
   }

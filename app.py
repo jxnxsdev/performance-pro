@@ -5,7 +5,7 @@ from datetime import datetime
 import pandas as pd
 from pathlib import Path, PureWindowsPath
 import sys
-import midi 
+import rtmidi
 app = Flask(__name__)
 
 if sys.platform == 'win32':
@@ -83,20 +83,39 @@ def midi_port():
 
 @app.route("/api/midi_ports",methods = ['POST'])
 def api_midi_port():
-    #print(midi.midi())
-    #import sys
-    #print(sys.version)
     import rtmidi
+    try:
+        port_id = int(json.loads(get_my_jsonified_data_DB1("select value from T000_status where key = 'port_id';") )[0]["value"])
+        
+    except:
+        port_id = None
 
     #print(rtmidi.get_api_name(rtmidi.API_UNIX_JACK))
     midiout = rtmidi.MidiOut(rtapi=rtmidi.API_UNSPECIFIED)
-    midiout.get_ports()
-    
-    # def ports():
-    #     return midiout.get_ports()
+    liste = midiout.get_ports()
+    res = []
+    id = 0
+    for l in liste:
+        a = {}
+        a["id"]  = id
+        a["port"] = l
+        a["aktiv"] = 0
+        if port_id == id:
+            a["aktiv"] = 1
+        id += 1
+        res.append(a)
+    return json.dumps(res)
 
-    # print(ports())
-    return {}
+
+@app.route("/api/midi_ports_select",methods = ['POST'])
+def midi_ports_select():
+    set_sql_data_DB1("REPLACE into T000_status (value, key) values( ? , 'port_name');",[request.get_json()["port"]])
+    set_sql_data_DB1("REPLACE into T000_status (value, key) values( ? , 'port_id');",[request.get_json()["id"]])
+    
+    Midi_Verbindung_oeffnen(int(request.get_json()["id"]))
+    return api_midi_port()
+    
+    
 
 
 ########################################################################################################################
@@ -156,7 +175,8 @@ def api_stueckerzeugen():
                  , gruppe int
                  , aktiv int
                  , microcheck int
-                 , muss_geprueft_werden int 
+                 , muss_geprueft_werden int
+                 , akt_value int 
                  )""",[])
 
 
@@ -174,7 +194,7 @@ def api_stueckerzeugen():
         , gruppe
         , aktiv
         ,microcheck
-        , muss_geprueft_werden) values (?,?,?,?,?,?,?,?,?,?,?) """,
+        , muss_geprueft_werden,akt_value) values (?,?,?,?,?,?,?,?,?,?,?,0) """,
         [
             int(kanal_aus_db1["id"])
             ,kanal_aus_db1["midi_kanal"]
@@ -403,6 +423,7 @@ def api_ablauf_produktion_weiter():
     max_ablauf = str(int(json.loads(get_my_jsonified_data("select max(ablauf_id)  a from t004_ablauf"))[0]["a"]) )
     if int(akt_ablauf) >= int(max_ablauf):
         akt_ablauf = max_ablauf
+    midi_send(akt_ablauf)
     set_sql_data_DB1("update t000_status set value = ? where key = 'akt_ablauf'",[akt_ablauf ])
     return get_my_jsonified_data('select * from t004_ablauf where ablauf_id >= '+ akt_ablauf  + ' order by ablauf_id LIMIT 4',)
 
@@ -412,12 +433,16 @@ def api_ablauf_produktion_zurueck():
     if akt_ablauf != '0':
         set_sql_data_DB1("update t000_status set value = ? where key = 'akt_ablauf'",[akt_ablauf ])
         akt_ablauf = '1'
+    midi_send(akt_ablauf)
     return get_my_jsonified_data('select * from t004_ablauf where ablauf_id >= '+ akt_ablauf + ' order by ablauf_id LIMIT 4',)
 
 @app.route("/api/ablauf_produktion_gehezu",methods = ['POST'])
 def api_ablauf_produktion_gehezu():
     akt_ablauf = str(request.get_json()["ablauf_id"])
     set_sql_data_DB1("update t000_status set value = ? where key = 'akt_ablauf'",[akt_ablauf ])
+    
+    midi_send(akt_ablauf)
+
     return get_my_jsonified_data('select * from t004_ablauf where ablauf_id >= '+ akt_ablauf + ' order by ablauf_id LIMIT 4',)
 
 
@@ -432,6 +457,26 @@ def api_maskieren_toggle():
     return {"return": maskierung} 
 
 
+def midi_send(akt_ablauf):
+    akt_ablauf = str(akt_ablauf)
+    aktion = json.loads(json.loads(get_my_jsonified_data('select aktion from t004_ablauf where ablauf_id = '+ akt_ablauf ))[0]['aktion'])
+    kanaele = json.loads(get_my_jsonified_data('select id, midi_kanal, midi_befehl,akt_value from t002_kanaele where aktiv = 1 and maskierung = 0'))
+    
+    for kanal in kanaele:
+        neue_aktion = aktion_kanal(aktion, kanal["id"])
+        if kanal["akt_value"] != neue_aktion:
+            midi_send_message(kanal, neue_aktion)
+        print(kanal, )
+
+
+def aktion_kanal(aktionen, id):
+    for aktion in aktionen:
+        if aktion["id"] == id:
+            return aktion["value"]
+
+def midi_send_message(kanal, neue_aktion):
+    global out
+    out.send_message([192,45])
 #######################################################################################################################
 ############################################## Micro Check
 ########################################################################################################################
@@ -489,12 +534,26 @@ def set_sql_data(sql,para):
     con.commit()
     return {}
 
+def Midi_Verbindung_oeffnen(port_id):
+    global out
+    try:
+        out =rtmidi.MidiOut()
+        out.open_port(int(port_id))
+        print("Verbindung zum Port " + str(port_id) +" OK")
+    except:
+        out = None
+        print("Es konnte keine Verbindung zum Port " + str(port_id) +" aufgebaut werden")
+
+
 try:
+    port_id = json.loads(get_my_jsonified_data_DB1("select value id from T000_status where key = 'port_id';"))[0]["id"]
+    Midi_Verbindung_oeffnen(port_id)
     aktuelles_Stueck = json.loads(get_my_jsonified_data_DB1("select value id from T000_status where key = 'akt_stueck_id';"))[0]["id"]
     aktuelles_Stueck_txt = json.loads(get_my_jsonified_data_DB1("select beschreibung_1 id from T001_stueck where id = "+str(aktuelles_Stueck)+";") )[0]["id"]
 except:
     aktuelles_Stueck = 1
     aktuelles_Stueck_txt = 'KEIN STÜCK'
+
 
 if __name__ == '__main__':
     app.run()
