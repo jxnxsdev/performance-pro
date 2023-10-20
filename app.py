@@ -476,7 +476,19 @@ def aktion_kanal(aktionen, id):
 
 def midi_send_message(kanal, neue_aktion):
     global out
-    out.send_message([192,45])
+    #out.send_message([192,45])
+    print(f"Kanel: {kanal['id']} neuer Wert: {neue_aktion}")
+    if kanal["akt_value"] != neue_aktion:
+        
+        set_sql_data("""update T002_kanaele set akt_value = ? where id = ?"""
+                 
+                 ,[
+                     neue_aktion, kanal['id']
+                   ])
+
+
+
+
 #######################################################################################################################
 ############################################## Micro Check
 ########################################################################################################################
