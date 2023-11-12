@@ -133,9 +133,9 @@ function maskierung_lesen()
         result.forEach(function(m){
           console.log(m)
           if (m.maskierung == 0)
-          {$('.maskierung_'+m.id).css({"visibility": "hidden"});}
+          {$('.maskierung_'+m.id).attr('hidden','');}
             else
-          {$('.maskierung_'+m.id).css({"visibility": "visible"});}
+          {$('.maskierung_'+m.id).removeAttr('hidden');}
         })
 
 
@@ -343,7 +343,7 @@ function cardausgeben(DatenAusgabe, AusgabeID) {
                     class_ = 'btn-warning'
                   }
                 //console.log(name)
-                let B = $('<button type="submit">'+k.id+ ' ' + name.beschreibung_1 + '<span class="badge rounded-pill badge-notification bg-danger maskierung_'+k.id+'">OFF</span></button>')
+                let B = $('<button type="submit">'+k.id+ ' ' + name.beschreibung_1 + '<span class="badge rounded-pill badge-notification bg-danger maskierung_'+k.id+'" hidden>OFF</span></button>')
                 
                 B.addClass('btn border border-5 btn_' + name.gruppe)
                 B.addClass(class_)
@@ -363,10 +363,12 @@ function cardausgeben(DatenAusgabe, AusgabeID) {
                     success:function(result){
                         console.log(result)
                         if (result.return == 0)
-                          {$('.maskierung_'+k.id).css({"visibility": "hidden"});}
+                          {$('.maskierung_'+k.id).attr('hidden','');}
                           else
-                          {$('.maskierung_'+k.id).css({"visibility": "visible"});}
+                          {$('.maskierung_'+k.id).removeAttr('hidden');}
                         
+
+
                         
                       }
                       ,error: function(result){

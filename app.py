@@ -423,16 +423,17 @@ def api_ablauf_produktion_weiter():
     max_ablauf = str(int(json.loads(get_my_jsonified_data("select max(ablauf_id)  a from t004_ablauf"))[0]["a"]) )
     if int(akt_ablauf) >= int(max_ablauf):
         akt_ablauf = max_ablauf
-    midi_send(akt_ablauf)
     set_sql_data_DB1("update t000_status set value = ? where key = 'akt_ablauf'",[akt_ablauf ])
-    return get_my_jsonified_data('select * from t004_ablauf where ablauf_id >= '+ akt_ablauf  + ' order by ablauf_id LIMIT 4',)
+    midi_send(akt_ablauf)
+    return get_my_jsonified_data('select * from t004_ablauf where ablauf_id >= '+ akt_ablauf + ' order by ablauf_id LIMIT 4',)
 
 @app.route("/api/ablauf_produktion_zurueck",methods = ['POST'])
 def api_ablauf_produktion_zurueck():
     akt_ablauf = str(int(json.loads(get_my_jsonified_data_DB1("select * from t000_status where key = 'akt_ablauf'"))[0]["value"]) -1)
-    if akt_ablauf != '0':
-        set_sql_data_DB1("update t000_status set value = ? where key = 'akt_ablauf'",[akt_ablauf ])
+    if int(akt_ablauf) <= 0:
         akt_ablauf = '1'
+    
+    set_sql_data_DB1("update t000_status set value = ? where key = 'akt_ablauf'",[akt_ablauf ])
     midi_send(akt_ablauf)
     return get_my_jsonified_data('select * from t004_ablauf where ablauf_id >= '+ akt_ablauf + ' order by ablauf_id LIMIT 4',)
 
@@ -465,8 +466,8 @@ def midi_send(akt_ablauf):
     for kanal in kanaele:
         neue_aktion = aktion_kanal(aktion, kanal["id"])
         if kanal["akt_value"] != neue_aktion:
-            midi_send_message(kanal, neue_aktion)
-        print(kanal, )
+            midi_send_message(kanal, neue_aktion, kanal["akt_value"])
+
 
 
 def aktion_kanal(aktionen, id):
@@ -474,10 +475,26 @@ def aktion_kanal(aktionen, id):
         if aktion["id"] == id:
             return aktion["value"]
 
-def midi_send_message(kanal, neue_aktion):
+def midi_send_message(kanal, neue_aktion, alterwert):
     global out
-    #out.send_message([192,45])
-    print(f"Kanel: {kanal['id']} neuer Wert: {neue_aktion}")
+    
+    ###################################
+    ## ToDo Anpassung ans Mischpult
+    ###################################
+
+
+    print(f"Kanel: {kanal['id']} alter Wert: {alterwert} -> neuer Wert: {neue_aktion}", kanal)
+    if neue_aktion == 1:
+        midi_value = 45
+    if neue_aktion == 0:
+        midi_value = 46
+    if int(kanal["midi_befehl"]) == 84:
+        x = 192
+    if out.is_port_open():
+        out.send_message([x,midi_value])
+        #out.send_message([192,45])
+    else:
+        print('Es ist kein Port offen!')
     if kanal["akt_value"] != neue_aktion:
         
         set_sql_data("""update T002_kanaele set akt_value = ? where id = ?"""
@@ -547,26 +564,39 @@ def set_sql_data(sql,para):
     return {}
 
 def Midi_Verbindung_oeffnen(port_id):
+    print ("Midi Verbindung öffnen: " + str(port_id))
     global out
-    try:
+    #try:
+    if out == None:
+        out =rtmidi.MidiOut()
+    if out.is_port_open():
+        out.close_port()
+        out.open_port(int(port_id))
+        print("Änderung der Verbindung zum Port " + str(port_id) +" " + str(int(out.is_port_open())))
+    else:
         out =rtmidi.MidiOut()
         out.open_port(int(port_id))
-        print("Verbindung zum Port " + str(port_id) +" OK")
+        print("Verbindung zum Port " + str(port_id) +" " + str(int(out.is_port_open())))
+    #except:
+    #    out = None
+    #    print("Es konnte keine Verbindung zum Port " + str(port_id) +" aufgebaut werden")
+
+def start():
+    global port_id
+    global aktuelles_Stueck
+    global aktuelles_Stueck_txt
+    try:
+        port_id = json.loads(get_my_jsonified_data_DB1("select value id from T000_status where key = 'port_id';"))[0]["id"]
+        Midi_Verbindung_oeffnen(port_id)
+        aktuelles_Stueck = json.loads(get_my_jsonified_data_DB1("select value id from T000_status where key = 'akt_stueck_id';"))[0]["id"]
+        aktuelles_Stueck_txt = json.loads(get_my_jsonified_data_DB1("select beschreibung_1 id from T001_stueck where id = "+str(aktuelles_Stueck)+";") )[0]["id"]
     except:
-        out = None
-        print("Es konnte keine Verbindung zum Port " + str(port_id) +" aufgebaut werden")
-
-
-try:
-    port_id = json.loads(get_my_jsonified_data_DB1("select value id from T000_status where key = 'port_id';"))[0]["id"]
-    Midi_Verbindung_oeffnen(port_id)
-    aktuelles_Stueck = json.loads(get_my_jsonified_data_DB1("select value id from T000_status where key = 'akt_stueck_id';"))[0]["id"]
-    aktuelles_Stueck_txt = json.loads(get_my_jsonified_data_DB1("select beschreibung_1 id from T001_stueck where id = "+str(aktuelles_Stueck)+";") )[0]["id"]
-except:
-    aktuelles_Stueck = 1
-    aktuelles_Stueck_txt = 'KEIN STÜCK'
+        aktuelles_Stueck = 1
+        aktuelles_Stueck_txt = 'KEIN STÜCK'
 
 
 if __name__ == '__main__':
+    out = None
+    start()
     app.run()
     #flask --debug --app app run
