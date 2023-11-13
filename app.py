@@ -41,6 +41,9 @@ def new_db0():
                     , value varchar(255) )
                     """,[])
 
+    set_sql_data_DB1("""insert into T000_status (key, value) values ('akt_ablauf', '1')
+                    """,[])
+
     set_sql_data_DB1("""CREATE TABLE T001_stueck 
                     (id INTEGER PRIMARY KEY   AUTOINCREMENT
                     , beschreibung_1 varchar(255)
@@ -62,7 +65,7 @@ def new_db0():
                     , muss_geprueft_werden int 
                     )""",[])
     for i in range (1 , 129):
-        set_sql_data_DB1("insert into T002_kanaele ( id , midi_kanal ,maskierung ,midi_befehl,frequenz,beschreibung_1,beschreibung_2, gruppe, aktiv,microcheck, muss_geprueft_werden) values (?,?,0,'84','','','',0,0,0,0) ",[i,i])
+        set_sql_data_DB1("insert into T002_kanaele ( id , midi_kanal ,maskierung ,midi_befehl,frequenz,beschreibung_1,beschreibung_2, gruppe, aktiv,microcheck, muss_geprueft_werden) values (?,?,0,'176','','','',0,0,0,0) ",[i,i+63])
 
     global aktuelles_Stueck
     aktuelles_Stueck = 1
@@ -485,13 +488,12 @@ def midi_send_message(kanal, neue_aktion, alterwert):
 
     print(f"Kanel: {kanal['id']} alter Wert: {alterwert} -> neuer Wert: {neue_aktion}", kanal)
     if neue_aktion == 1:
-        midi_value = 45
+        midi_value = 127
     if neue_aktion == 0:
-        midi_value = 46
-    if int(kanal["midi_befehl"]) == 84:
-        x = 192
+        midi_value = 0
+    
     if out.is_port_open():
-        out.send_message([x,midi_value])
+        out.send_message([int(kanal["midi_befehl"]), int(kanal["midi_kanal"]),midi_value])
         #out.send_message([192,45])
     else:
         print('Es ist kein Port offen!')
