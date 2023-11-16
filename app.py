@@ -13,7 +13,7 @@ if sys.platform == 'win32':
 else:
     data_folder = Path(__file__).parents[0]
 
-
+g_jinja = {}
 ########################################################################################################################
 ############################################## Initialisierung der DB1
 ########################################################################################################################
@@ -21,6 +21,7 @@ else:
 def new_db0():
     import shutil
     import os
+
     jetzt = datetime.now()
     newpath = jetzt.strftime("%Y%m%d_%H%M%S")
     os.mkdir(data_folder / "db" / newpath)
@@ -78,11 +79,13 @@ def new_db0():
 ############################################## Midi Ports auswählen
 ########################################################################################################################
 
+
+
 @app.route("/midi_port") 
 def midi_port():
     global aktuelles_Stueck_txt
 
-    return render_template('t007_midi_ports.html', aktuelles_Stueck_txt=aktuelles_Stueck_txt)
+    return render_template('t007_midi_ports.html', aktuelles_Stueck_txt=aktuelles_Stueck_txt, g_jinja=g_jinja)
 
 @app.route("/api/midi_ports",methods = ['POST'])
 def api_midi_port():
@@ -124,18 +127,28 @@ def midi_ports_select():
 ########################################################################################################################
 ############################################## Stücke
 ########################################################################################################################
+def local(request):
+    global g_jinja
+    if request.remote_addr == '127.0.0.1':
+        g_jinja["local"] = 1
+    else:
+        g_jinja["local"] = 0
+    print (g_jinja)
 
 @app.route("/") 
 def impressum():
     global aktuelles_Stueck_txt
+    local(request)
+        
 
-    return render_template('impressum.html', aktuelles_Stueck_txt=aktuelles_Stueck_txt)
+    return render_template('impressum.html', aktuelles_Stueck_txt=aktuelles_Stueck_txt, g_jinja=g_jinja)
 
 @app.route("/t001_stueck") 
 def t001_stueck():
+    local(request)
     global aktuelles_Stueck_txt
 
-    return render_template('t001_stuecke.html', aktuelles_Stueck_txt=aktuelles_Stueck_txt)
+    return render_template('t001_stuecke.html', aktuelles_Stueck_txt=aktuelles_Stueck_txt, g_jinja=g_jinja)
 
 @app.route("/api/stuecke",methods = ['POST'])
 def api_stuecke():
@@ -229,9 +242,10 @@ def api_stueckerzeugen():
 ########################################################################################################################
 @app.route("/t002_db1_kanaele") 
 def t002_db1_kanaele():
+    local(request)
     global aktuelles_Stueck_txt
     
-    return render_template('t002_kanaele.html', api='/api/db1/', aktuelles_Stueck_txt=aktuelles_Stueck_txt)
+    return render_template('t002_kanaele.html', api='/api/db1/', aktuelles_Stueck_txt=aktuelles_Stueck_txt, g_jinja=g_jinja)
 
 
 ########################################################################################################################
@@ -278,9 +292,10 @@ def api_db1_kanal_save():
 ########################################################################################################################
 @app.route("/t002_kanaele") 
 def t002_kanaele():
+    local(request)
     global aktuelles_Stueck_txt
 
-    return render_template('t002_kanaele.html', api='/api/', aktuelles_Stueck_txt=aktuelles_Stueck_txt)
+    return render_template('t002_kanaele.html', api='/api/', aktuelles_Stueck_txt=aktuelles_Stueck_txt, g_jinja=g_jinja)
 ########################################################################################################################
 
 @app.route("/api/kanaele",methods = ['POST'])
@@ -325,9 +340,10 @@ def api_kanal_save():
 ########################################################################################################################
 @app.route("/t004_ablauf") 
 def t004_ablauf():
+    local(request)
     global aktuelles_Stueck_txt
 
-    return render_template('t004_ablauf.html', aktuelles_Stueck_txt=aktuelles_Stueck_txt)
+    return render_template('t004_ablauf.html', aktuelles_Stueck_txt=aktuelles_Stueck_txt, g_jinja=g_jinja)
 
 @app.route("/api/ablauf",methods = ['POST'])
 def api_ablauf():
@@ -402,8 +418,9 @@ def api_ablauf_toggle():
 ########################################################################################################################
 @app.route("/t005_produktion") 
 def t005_produktion():
+    local(request)
     global aktuelles_Stueck_txt
-    return render_template('t005_produktion.html', aktuelles_Stueck_txt=aktuelles_Stueck_txt)
+    return render_template('t005_produktion.html', aktuelles_Stueck_txt=aktuelles_Stueck_txt, g_jinja=g_jinja)
 
 
 @app.route("/api/ablauf_akt_punkt",methods = ['POST'])
@@ -513,9 +530,10 @@ def midi_send_message(kanal, neue_aktion, alterwert):
 ########################################################################################################################
 @app.route("/t006_microcheck") 
 def t006_microcheck():
+    local(request)
     global aktuelles_Stueck_txt
 
-    return render_template('t006_microcheck.html', aktuelles_Stueck_txt=aktuelles_Stueck_txt)
+    return render_template('t006_microcheck.html', aktuelles_Stueck_txt=aktuelles_Stueck_txt, g_jinja=g_jinja)
 
 @app.route("/api/microcheck_toggle",methods = ['POST'])
 def api_microcheck_toggle():
@@ -527,6 +545,14 @@ def api_microcheck_toggle():
     return api_kanaele()
 
 
+@app.route("/api/checkmenge",methods = ['POST'])
+def api_checkmenge():
+    microcheck = json.loads(get_my_jsonified_data("select microcheck, count(1) checkmenge from T002_kanaele where aktiv = 1 group by microcheck"))
+     
+    
+    return microcheck
+
+
 #######################################################################################################################
 def on_to_int(x):
     if str(x) == 'on' or str(x) == '1':
@@ -535,9 +561,9 @@ def on_to_int(x):
         return 0
 
 def get_my_jsonified_data_DB1(sql):
-    cnx = sqlite3.connect(data_folder / "db" / "db.db")
-    data = pd.read_sql_query(sql, cnx).to_json(orient ='records')
-
+    cnx_db1 = sqlite3.connect(data_folder / "db" / "db.db")
+    data = pd.read_sql_query(sql, cnx_db1).to_json(orient ='records')
+    cnx_db1.close()
     #print(data)
     return data
 
@@ -554,6 +580,7 @@ def set_sql_data_DB1(sql,para):
     #print(sql)
     cur.execute(sql,para)
     con.commit()
+    con.close()
     return {}
 
 def set_sql_data(sql,para):
@@ -563,6 +590,7 @@ def set_sql_data(sql,para):
     print(sql, str(para))
     cur.execute(sql,para)
     con.commit()
+    con.close()
     return {}
 
 def Midi_Verbindung_oeffnen(port_id):
@@ -600,5 +628,5 @@ def start():
 if __name__ == '__main__':
     out = None
     start()
-    app.run()
+    app.run(host="0.0.0.0",debug=True )
     #flask --debug --app app run
