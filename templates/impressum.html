@@ -1,4 +1,6 @@
-<html lang="en"><head>
+<!DOCTYPE html>
+<html lang="de">
+  <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
   <meta name="description" content="">
@@ -22,7 +24,7 @@
   <div class="cover-container d-flex h-100 p-3 mx-auto flex-column">
 
     <header class="masthead mb-auto">
-      <div class="inner">
+      <div class="inner" hidden>
         
         <nav class="nav nav-masthead justify-content-center">
           {% if g_jinja.local == 1 %}
@@ -66,7 +68,8 @@
   <!-- Bootstrap core JavaScript
   ================================================== -->
   <!-- Placed at the end of the document so the pages load faster -->
-  <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+  <!-- <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script> -->
+  <script src="{{ url_for('static', filename='jquery321.min.js') }}"></script>
   <script type="text/javascript" src="{{ url_for('static', filename='jquery-3.6.0.min.js') }}"></script>
   <script src="{{ url_for('static', filename='popper.min.js') }}"></script>
   <script src="{{ url_for('static', filename='bootstrap.min.js') }}"></script>
