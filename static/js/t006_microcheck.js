@@ -55,7 +55,7 @@ function microcheck_lesen()
         }
         if (result.length == 1){
           if (result[0].microcheck == 0)offen = result[0].checkmenge 
-          if (result[0].microcheck == 1)fertig = result[0].checkmenge
+          if (result[0].microcheck == 1){fertig = result[0].checkmenge;             offen = result[0].checkmenge;}
         }
         
         $("#checkmenge").html( "Check: " + fertig+ "/" + offen)
@@ -107,6 +107,7 @@ function cardausgeben(DatenAusgabe, AusgabeID) {
               )
               
               if (m.microcheck == 1)c.css("background-color",'#008f00');
+              if (m.microcheck == 1 && m.maskierung == 1)c.css("background-color",'#ff2200');
 
               cb.click(function(){
                 $.ajax({
