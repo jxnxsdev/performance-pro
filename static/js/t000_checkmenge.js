@@ -24,8 +24,14 @@ function microcheck_lesen()
           if (result[1].microcheck == 1)fertig = result[1].checkmenge
         }
         if (result.length == 1){
-          if (result[0].microcheck == 0)offen = result[0].checkmenge 
-          if (result[0].microcheck == 1)fertig = result[0].checkmenge
+          if (result[0].microcheck == 0){offen = result[0].checkmenge ;  }
+          if (result[0].microcheck == 1){
+            fertig = result[0].checkmenge; 
+            offen = result[0].checkmenge;
+
+          }
+
+          
         }
         
         $("#checkmenge").html( "Check: " + fertig+ "/" + offen)

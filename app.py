@@ -19,6 +19,8 @@ g_jinja = {}
 ########################################################################################################################
 @app.route("/create_db",methods = ['GET'])
 def new_db0():
+    if local(request):
+        return local(request)    
     import shutil
     import os
 
@@ -83,6 +85,8 @@ def new_db0():
 
 @app.route("/midi_port") 
 def midi_port():
+    if local(request):
+        return local(request)    
     global aktuelles_Stueck_txt
 
     return render_template('t007_midi_ports.html', aktuelles_Stueck_txt=aktuelles_Stueck_txt, g_jinja=g_jinja)
@@ -122,30 +126,36 @@ def midi_ports_select():
     return api_midi_port()
     
     
+########################################################################################################################
+############################################## Aufruf von Localhost
+########################################################################################################################
 
 
-########################################################################################################################
-############################################## Stücke
-########################################################################################################################
 def local(request):
     global g_jinja
     if request.remote_addr == '127.0.0.1':
         g_jinja["local"] = 1
+        return False
     else:
         g_jinja["local"] = 0
-    print (g_jinja)
+        return t006_microcheck()
 
+########################################################################################################################
+############################################## Stücke
+########################################################################################################################
 @app.route("/") 
 def impressum():
     global aktuelles_Stueck_txt
-    local(request)
+    if local(request):
+        return local(request)
         
 
     return render_template('impressum.html', aktuelles_Stueck_txt=aktuelles_Stueck_txt, g_jinja=g_jinja)
 
 @app.route("/t001_stueck") 
 def t001_stueck():
-    local(request)
+    if local(request):
+        return local(request)
     global aktuelles_Stueck_txt
 
     return render_template('t001_stuecke.html', aktuelles_Stueck_txt=aktuelles_Stueck_txt, g_jinja=g_jinja)
@@ -242,7 +252,8 @@ def api_stueckerzeugen():
 ########################################################################################################################
 @app.route("/t002_db1_kanaele") 
 def t002_db1_kanaele():
-    local(request)
+    if local(request):
+        return local(request)
     global aktuelles_Stueck_txt
     
     return render_template('t002_kanaele.html', api='/api/db1/', aktuelles_Stueck_txt=aktuelles_Stueck_txt, g_jinja=g_jinja)
@@ -292,7 +303,8 @@ def api_db1_kanal_save():
 ########################################################################################################################
 @app.route("/t002_kanaele") 
 def t002_kanaele():
-    local(request)
+    if local(request):
+        return local(request)
     global aktuelles_Stueck_txt
 
     return render_template('t002_kanaele.html', api='/api/', aktuelles_Stueck_txt=aktuelles_Stueck_txt, g_jinja=g_jinja)
@@ -340,7 +352,8 @@ def api_kanal_save():
 ########################################################################################################################
 @app.route("/t004_ablauf") 
 def t004_ablauf():
-    local(request)
+    if local(request):
+        return local(request)
     global aktuelles_Stueck_txt
 
     return render_template('t004_ablauf.html', aktuelles_Stueck_txt=aktuelles_Stueck_txt, g_jinja=g_jinja)
@@ -418,7 +431,8 @@ def api_ablauf_toggle():
 ########################################################################################################################
 @app.route("/t005_produktion") 
 def t005_produktion():
-    local(request)
+    if local(request):
+        return local(request)
     global aktuelles_Stueck_txt
     return render_template('t005_produktion.html', aktuelles_Stueck_txt=aktuelles_Stueck_txt, g_jinja=g_jinja)
 
@@ -530,7 +544,6 @@ def midi_send_message(kanal, neue_aktion, alterwert):
 ########################################################################################################################
 @app.route("/t006_microcheck") 
 def t006_microcheck():
-    local(request)
     global aktuelles_Stueck_txt
 
     return render_template('t006_microcheck.html', aktuelles_Stueck_txt=aktuelles_Stueck_txt, g_jinja=g_jinja)
@@ -547,7 +560,7 @@ def api_microcheck_toggle():
 
 @app.route("/api/checkmenge",methods = ['POST'])
 def api_checkmenge():
-    microcheck = json.loads(get_my_jsonified_data("select microcheck, count(1) checkmenge from T002_kanaele where aktiv = 1 group by microcheck"))
+    microcheck = json.loads(get_my_jsonified_data("select microcheck as microcheck, count(1) checkmenge from T002_kanaele where aktiv = 1 group by microcheck"))
      
     
     return microcheck
