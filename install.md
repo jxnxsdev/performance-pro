@@ -11,7 +11,7 @@ https://visualstudio.microsoft.com/visual-cpp-build-tools/
 pip install -r .\requirement.txt
 
 
-
+C:\Users\Micha\AppData\Roaming\Python\Python311\Scripts\pyinstaller app.py
 
 ## Linux
 sudo apt-get install libasound2-dev

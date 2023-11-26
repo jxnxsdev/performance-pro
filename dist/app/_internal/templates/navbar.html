@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="de">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, shrink-to-fit=no"
+    />
+    <!--<meta http-equiv="x-ua-compatible" content="ie=edge" />-->
+    <title>PERFORMACE Pro</title>
+    <!-- MDB icon -->
+
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+
+    <link rel="icon" href="/" type="image/x-icon" />
+    <!-- Font Awesome -->
+    <!--
+    <link
+      rel="stylesheet"
+      href="https://use.fontawesome.com/releases/v5.15.2/css/all.css"
+    />
+-->
+    <!-- Google Fonts Roboto -->
+    <!--
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap"
+    />
+    -->
+    <!-- Dark MDB theme -->
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='mdb.dark.min.css') }}">
+    <!-- Regular MDB theme -->
+    <!-- <link rel="stylesheet" href="css/mdb.min.css" /> -->
+
+
+    <style>
+      .bi{
+          margin-left: 10px;
+      }
+
+
+
+.btn_1{ border-color: #0066b3!important;}
+.btn_2{ border-color: #00487d!important;}
+.btn_3{ border-color: #bfe4ff!important;}
+.btn_4{ border-color: #80c9ff!important;}
+.btn_5{ border-color: #ff8000!important;}
+.btn_6{ border-color: #b35a00!important;}
+.btn_7{ border-color: #ffdfbf!important;}
+.btn_8{ border-color: #ffc080!important;}
+.btn_9{ border-color: #ffcc00!important;}
+.btn_10{ border-color: #b38f00!important;}
+.btn_11{ border-color: #fff2bf!important;}
+.btn_12{ border-color: #ffe680!important;}
+.btn_13{ border-color: #330099!important;}
+.btn_14{ border-color: #24006b!important;}
+.btn_15{ border-color: #d5bfff!important;}
+.btn_16{ border-color: #aa80ff!important;}
+
+  </style>
+
+  </head>
+  <body>
+    
+
+  
+  
+  <!-- Navbar -->
+<nav class="navbar navbar-expand navbar-dark bg-dark">
+  <!-- Container wrapper -->
+  <div class="container-fluid">
+    <!-- Toggle button -->
+    <button
+      class="navbar-toggler"
+      type="button"
+      data-mdb-toggle="collapse"
+      data-mdb-target="#navbarSupportedContent"
+      aria-controls="navbarSupportedContent"
+      aria-expanded="false"
+      aria-label="Toggle navigation"
+    >
+      <i class="fas fa-bars"></i>
+    </button>
+
+    <!-- Collapsible wrapper -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <!-- Navbar brand -->
+      <a class="navbar-brand mt-2 mt-lg-0" href="/">
+        PERFORMACE Pro
+      </a>
+      <!-- Left links -->
+      <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+        {% if g_jinja.local == 1 %}
+        <li class="nav-item">
+          <a class="nav-link" href="t001_stueck">Stück</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="t002_kanaele">Kanäle</a>
+        </li>
+        <!-- <li class="nav-item">
+          <a class="nav-link" href="t003_besetzung">Besetzung</a>
+        </li> -->
+        <li class="nav-item">
+          <a class="nav-link" href="t004_ablauf">Ablauf</a>
+        </li>
+        {% endif %}
+        <li class="nav-item">
+          <a class="nav-link" href="t006_microcheck">Micro Check</a>
+        </li>
+        {% if g_jinja.local == 1 %}
+        <li class="nav-item">
+          <a class="nav-link" href="t005_produktion">Produktion</a>
+        </li>
+        {% endif %}
+      </ul>
+      <!-- Left links -->
+    </div>
+    <!-- Collapsible wrapper -->
+
+    <!-- Right elements -->
+    <div class="d-flex align-items-center">
+      <!-- Icon -->
+      <i class="navbar-brand mt-2 mt-lg-0" id="checkmenge"></i>
+      <i class="navbar-brand mt-2 mt-lg-0" id="aktuelles_Stueck_txt">{{aktuelles_Stueck_txt}}</i>
+
+
+      <!-- Notifications -->
+      {% if g_jinja.local == 1 %}
+      <div class="dropdown">
+
+        <a
+          class="text-reset me-3 dropdown-toggle hidden-arrow"
+          href="#"
+          id="navbarDropdownMenuLink"
+          role="button"
+          data-mdb-toggle="dropdown"
+          aria-expanded="false"
+        >
+          <i class="bi bi-gear"></i>
+          
+        </a>
+        <ul
+          class="dropdown-menu dropdown-menu-end"
+          aria-labelledby="navbarDropdownMenuLink"
+        >
+
+          <li>
+            <a class="dropdown-item" href="t002_db1_kanaele">Grundeinstellung Kanäle</a>
+          </li>
+          <li>
+            <a class="dropdown-item" href="midi_port">Auswahl Midi Port</a>
+          </li>
+        </ul>
+      </div>
+      {% endif %}
+      <!-- Avatar -->
+      <div class="dropdown">
+        <!-- <a
+          class="dropdown-toggle d-flex align-items-center hidden-arrow"
+          href="#"
+          id="navbarDropdownMenuAvatar"
+          role="button"
+          data-mdb-toggle="dropdown"
+          aria-expanded="false"
+        > -->
+          <l
+            id="stueck_navbar"
+            class="rounded-circle"
+            height="25"
+            alt="aktuelles Stück"
+            
+          />
+        </l>
+       <!--  <ul
+          class="dropdown-menu dropdown-menu-end"
+          aria-labelledby="navbarDropdownMenuAvatar"
+        >
+          <li>
+            <a class="dropdown-item" href="#">My profile</a>
+          </li>
+          <li>
+            <a class="dropdown-item" href="#">Settings</a>
+          </li>
+          <li>
+            <a class="dropdown-item" href="#">Logout</a>
+          </li>
+        </ul> -->
+      </div>
+    </div>
+    <!-- Right elements -->
+  </div>
+  <!-- Container wrapper -->
+</nav>
+<!-- Navbar -->
