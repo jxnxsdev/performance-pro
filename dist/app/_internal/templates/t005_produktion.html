@@ -1,0 +1,59 @@
+{% include "navbar.html" %}
+
+
+<style>
+    .bi{
+        margin-left: 10px;
+    }
+    .ausw_button
+    {
+        margin-left: 10px;
+        margin-top: 10px;
+    }
+
+</style>
+
+
+
+
+<!-- <div class="container-fluid">
+    <div class="row-1">
+        <div class="col-12">
+           
+        </div>
+    </div>
+</div> -->
+
+
+
+
+
+<div class="container-fluid">
+    <div class="row flex-nowrap">
+        <div class="col-auto col-md-3 col-xl-2 px-sm-2 px-0 bg-dark">
+            <div class="d-flex flex-column align-items-center align-items-sm-start px-3 pt-2 text-white min-vh-100">
+
+                <button onclick="send('ablauf_produktion_weiter')" class="btn btn-primary ausw_button">weiter F1</button>
+                <button onclick="send('ablauf_produktion_zurueck')" class="btn btn-primary ausw_button">zurück F2</button>
+                <hr>
+                    <span class="fs-5 d-none d-sm-inline">Szene:</span>
+                
+                    <div id="szeneliste"></div>        
+                        
+                
+                    
+            </div>
+        </div>
+        
+        <div class="col py-3">
+            <div id="ausgabe"></div>
+        </div>
+    </div>
+</div>
+
+
+
+
+{% include 'footer.html' %}
+<script src="{{ url_for('static', filename='js/t000_checkmenge.js') }}"></script>
+<script src="{{ url_for('static', filename='js/t005_produktion.js') }}"></script>
