@@ -76,6 +76,16 @@ def new_db0():
     aktuelles_Stueck_txt = ''
     return {"aktuelles_Stueck":"1"}
 
+########################################################################################################################
+############################################## Einstellungen
+########################################################################################################################
+@app.route("/t008_einstellungen")
+def t008_einstellungen():
+    if local(request):
+        return local(request)
+    global aktuelles_Stueck_txt
+    
+    return render_template('t008_einstellungen.html', aktuelles_Stueck_txt=aktuelles_Stueck_txt, g_jinja=g_jinja)
 
 ########################################################################################################################
 ############################################## Midi Ports auswählen
