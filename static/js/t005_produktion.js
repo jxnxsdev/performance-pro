@@ -316,8 +316,9 @@ function cardausgeben(DatenAusgabe, AusgabeID) {
           //################ Jede Zeile #################
       
             let c = $('<div class="card" style="width: 98%; margin:20px"></div>')
-            if (i == 0)c.css("background-color",'#00487d');
-            if (i == 1)c.css("background-color",'#008f00');
+            if (i == 0)c.css("background-color",localStorage.getItem('current_scene_color'));
+            else if (i == 1)c.css("background-color",localStorage.getItem('next_scene_color'));
+            else c.css("background-color",localStorage.getItem('following_scene_color'));
 
             let cb = $('<div class="card-body"></div>')
             let ct = $('<h5 class="card-title"></h5>')
@@ -417,7 +418,7 @@ function szenelisteausgeben(DatenAusgabe, AusgabeID) {
             let s = $('<p></p>')
             s.html(m.ablauf_id + ' ' + m.szene + ' <i class="bi bi-arrow-right-short"></i>')
             if (m.ablauf_id == m.akt_ablauf)
-            {s.css("background-color",'#00487d')};
+            {s.css("background-color",localStorage.getItem('current_scene_color') )};
             
 
             s.click(function(){
@@ -432,4 +433,22 @@ function szenelisteausgeben(DatenAusgabe, AusgabeID) {
   }
 }
 
+let defaultCurrent = '#00487d';
+let defaultNext = '#008f00';
+let defaultFollowing = '#424242';
 
+async function checkStorage() {
+    if (localStorage.getItem('current_scene_color') === null) {
+        localStorage.setItem('current_scene_color', defaultCurrent);
+    }
+
+    if (localStorage.getItem('next_scene_color') === null) {
+        localStorage.setItem('next_scene_color', defaultNext);
+    }
+
+    if (localStorage.getItem('following_scene_color') === null) {
+        localStorage.setItem('following_scene_color', defaultFollowing);
+    }
+}
+
+checkStorage();
