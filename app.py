@@ -5,7 +5,7 @@ from datetime import datetime
 import pandas as pd
 from pathlib import Path, PureWindowsPath
 import sys
-#import rtmidi
+import rtmidi
 app = Flask(__name__)
 
 if sys.platform == 'win32':
