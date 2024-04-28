@@ -5,7 +5,7 @@ from datetime import datetime
 import pandas as pd
 from pathlib import Path, PureWindowsPath
 import sys
-import rtmidi
+#import rtmidi
 app = Flask(__name__)
 
 if sys.platform == 'win32':
@@ -191,6 +191,16 @@ def api_stueck_save():
     aktuelles_Stueck_txt = request.get_json()["beschreibung_1"]
     set_sql_data_DB1("update T001_stueck set beschreibung_1 = ?, beschreibung_2 = ?, jahr = ? where id = ?",   [request.get_json()["beschreibung_1"],request.get_json()["beschreibung_2"],request.get_json()["jahr"],request.get_json()["id"] ])
     return get_my_jsonified_data_DB1("select * ,(select 'aktiv' from T000_status t0 where t0.key = 'akt_stueck_id' and t0.value = t1.id) as aktiv from T001_stueck t1 order by id desc;")
+
+
+@app.route("/api/stueck_delete",methods = ['POST'])
+def api_stueck_delete():
+
+    global aktuelles_Stueck_txt
+    
+    set_sql_data_DB1("delete from T001_stueck where id = ?",   [request.get_json()["id"] ])
+    return get_my_jsonified_data_DB1("select * ,(select 'aktiv' from T000_status t0 where t0.key = 'akt_stueck_id' and t0.value = t1.id) as aktiv from T001_stueck t1 order by id desc;")
+
 
 
 @app.route("/api/stueckerzeugen",methods = ['POST'])
@@ -401,6 +411,25 @@ def api_ablauf_move():
                  [request.get_json()["id"], ablauf_id -1])  
     return get_my_jsonified_data('select * from t004_ablauf order by ablauf_id')
 
+@app.route("/api/ablauf_copy",methods = ['POST'])
+def api_ablauf_copy():
+    ablauf_id = json.loads(get_my_jsonified_data('select ablauf_id from t004_ablauf where id = ' + str(request.get_json()["id"]) ))[0]["ablauf_id"]
+    print(ablauf_id)
+    if request.get_json()["richtung"] == 1: ##copy down
+        set_sql_data("update t004_ablauf set ablauf_id = ablauf_id + 1 where ablauf_id > ?",
+                 [ablauf_id])    
+        
+        set_sql_data("""insert into t004_ablauf (ablauf_id, aktion, stichwort,szene)
+                        select ablauf_id + 1, aktion, stichwort,szene from t004_ablauf where id = ?
+                     """,
+                 [request.get_json()["id"] ])
+    # else:                                   ##copy up
+    #     set_sql_data("update t004_ablauf set ablauf_id = ablauf_id - 1 where id = ?",
+    #              [request.get_json()["id"] ])
+    #     set_sql_data("update t004_ablauf set ablauf_id = ablauf_id + 1 where id != ? and ablauf_id = ?",
+    #              [request.get_json()["id"], ablauf_id -1])  
+    return get_my_jsonified_data('select * from t004_ablauf order by ablauf_id')
+
 
 @app.route("/api/ablauf_add",methods = ['POST'])
 def api_ablauf_add():
@@ -413,6 +442,19 @@ def api_ablauf_add():
     ## neu einfügen in Lücke
     result = get_my_jsonified_data('select id, 0 as value from T002_kanaele order by id')
     set_sql_data("insert into t004_ablauf (ablauf_id, aktion, stichwort ,szene) values (?,?,'','' )" ,[ablauf_id + 1, result] )
+    return get_my_jsonified_data('select * from t004_ablauf order by ablauf_id')
+
+@app.route("/api/ablauf_del",methods = ['POST'])
+def api_ablauf_del():
+    ablauf_id = json.loads(get_my_jsonified_data('select ablauf_id from t004_ablauf where id = ' + str(request.get_json()["id"]) ))[0]["ablauf_id"]
+    print(ablauf_id)
+
+    ## Verschieben nach oben
+    set_sql_data("update t004_ablauf set ablauf_id = ablauf_id - 1 where ablauf_id > ?",
+                [ablauf_id ])
+    
+    # Löschen
+    set_sql_data("delete from t004_ablauf where id = ? " ,[str(request.get_json()["id"])] )
     return get_my_jsonified_data('select * from t004_ablauf order by ablauf_id')
 
 

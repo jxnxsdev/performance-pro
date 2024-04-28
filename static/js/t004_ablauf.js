@@ -133,6 +133,31 @@ function move(id,richtung)
 
 }
 
+function copy(id,richtung)
+{
+  
+  $.ajax({
+    url: "api/ablauf_copy", //the page containing php script
+    type: "POST", //request type
+    dataType: 'json',
+    headers: { 'Content-Type': 'application/json' },
+    data: JSON.stringify({
+                id: id
+                , richtung: richtung
+                
+    }),
+      success:function(result){
+        cardausgeben(result, "ausgabe")
+        console.log(result);      
+    }
+    ,error: function(result){
+      
+      console.log(result);
+    }           
+  } );
+
+}
+
 function add_(id)
 {
   
@@ -156,6 +181,31 @@ function add_(id)
   } );
 
 }
+
+function del_(id)
+{
+  
+  $.ajax({
+    url: "api/ablauf_del", //the page containing php script
+    type: "POST", //request type
+    dataType: 'json',
+    headers: { 'Content-Type': 'application/json' },
+    data: JSON.stringify({
+                id: id
+                
+    }),
+      success:function(result){
+        cardausgeben(result, "ausgabe")
+        console.log(result);      
+    }
+    ,error: function(result){
+      
+      console.log(result);
+    }           
+  } );
+
+}
+
 function toggle(id,kanal_nr,value)
 {
   
@@ -213,25 +263,35 @@ function cardausgeben(DatenAusgabe, AusgabeID) {
               B.click(function(){
                 save(m.id, s.val(), sz.val())
                 
-                ct.html("Stichwort: "+s.val() + ' <i class="bi bi-pen"></i>')
+                ct.html("Stichwort: "+s.val() + ' <i class="bi bi-pen hover-text"><span class="tooltip-text" id="right">Bearbeiten</span></i>')
                 cb.append(ct)
               })
               cb.append(szl, sz, sl,s,  B)
             })
-            let up = $('<i class="bi bi-arrow-bar-up"></i>')
+            let up = $('<i class="bi bi-arrow-bar-up hover-text"><span class="tooltip-text" id="right">Verschieben nach oben</span></i>')
             up.click(function(){
               move(m.id,-1)
             })
-            let down = $('<i class="bi bi-arrow-bar-down"></i>')
+            let down = $('<i class="bi bi-arrow-bar-down hover-text"><span class="tooltip-text" id="right">Verschieben nach unten</span></i>')
             down.click(function(){
               move(m.id,1)
             })
-            let add = $('<i class="bi bi-arrow-down-square"></i>')
+            let copy_down = $('<i class="bbi bi-box-arrow-down hover-text"><span class="tooltip-text" id="right">Kopieren nach unten</span></i>')
+            copy_down.click(function(){
+              copy(m.id,1)
+            })
+            let add = $('<i class="bi bi-arrow-down-square hover-text"><span class="tooltip-text" id="right">Neu einfügen</span></i>')
             add.click(function(){
               add_(m.id)
             })
 
-            ct.append(pen, add)
+            let del = $('<i class="bi bi-x-square hover-text"><span class="tooltip-text" id="right">löschen</span></i>')
+            del.click(function(){
+              del_(m.id)
+            })
+
+
+            ct.append(pen, add, del, copy_down)
             if (m.ablauf_id > 1) ct.append(up)
             if (m.ablauf_id < DatenAusgabe.length) ct.append(down)
             cb.append(ct)

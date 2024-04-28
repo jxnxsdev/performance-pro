@@ -73,6 +73,30 @@ function save(id,beschreibung_1,beschreibung_2,jahr)
 
 }
 
+function stueck_delete(id)
+{
+  
+  $.ajax({
+    url: "api/stueck_delete", //the page containing php script
+    type: "POST", //request type
+    dataType: 'json',
+    headers: { 'Content-Type': 'application/json' },
+    data: JSON.stringify({
+                id: id
+    }),
+      success:function(result){
+        cardausgeben(result, "ausgabe")
+        console.log(result);      
+    }
+    ,error: function(result){
+      
+      console.log(result);
+    }           
+  } );
+
+}
+
+
 function stueckauswahl(id)
 {
   console.log("stueckauswahl id:" + id )
@@ -136,7 +160,14 @@ ct.click(function(){
     save(m.id, b1.val(),b2.val(),j.val())
     
   })
-  cb.append(b1l,b1,b2l,b2,jl,j,B)
+
+  let D = $('<button type="submit" class="btn btn-danger">Delete</button>')
+  D.click(function(){
+    stueck_delete(m.id)
+    
+  })
+
+  cb.append(b1l,b1,b2l,b2,jl,j,B,D)
 })
 
 let cont1 = $('<p class="card-text">'+m.beschreibung_2+'</p>')
