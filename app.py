@@ -6,6 +6,8 @@ import pandas as pd
 from pathlib import Path, PureWindowsPath
 import sys
 import rtmidi
+import shutil
+import os
 app = Flask(__name__)
 
 if sys.platform == 'win32':
@@ -21,8 +23,6 @@ g_jinja = {}
 def new_db0():
     if local(request):
         return local(request)    
-    import shutil
-    import os
 
     jetzt = datetime.now()
     newpath = jetzt.strftime("%Y%m%d_%H%M%S")
@@ -197,8 +197,87 @@ def api_stueck_save():
 def api_stueck_delete():
 
     global aktuelles_Stueck_txt
+    id = request.get_json()["id"]
+    try:
+        os.mkdir(data_folder / "db" / "archiv")
+    except:
+        pass
+
+    jetzt = datetime.now()
+    newpath = jetzt.strftime("%Y%m%d_%H%M%S")
+    name = json.loads(get_my_jsonified_data_DB1(f"select beschreibung_1  from T001_stueck where id = {id};"))
+    name = name[0]["beschreibung_1"] + newpath
+    shutil.move(data_folder / "db" / f"{id}.db", data_folder / "db" / "archiv" / f"{name}.db")
     
+
     set_sql_data_DB1("delete from T001_stueck where id = ?",   [request.get_json()["id"] ])
+    return get_my_jsonified_data_DB1("select * ,(select 'aktiv' from T000_status t0 where t0.key = 'akt_stueck_id' and t0.value = t1.id) as aktiv from T001_stueck t1 order by id desc;")
+
+
+@app.route("/api/stueck_sicherung",methods = ['POST'])
+def api_stueck_sicherung():
+
+    global aktuelles_Stueck_txt
+    id = request.get_json()["id"]
+    try:
+        os.mkdir(data_folder / "db" / "save")
+    except:
+        pass
+
+    jetzt = datetime.now()
+    newpath = jetzt.strftime("%Y%m%d_%H%M%S")
+    name = json.loads(get_my_jsonified_data_DB1(f"select beschreibung_1  from T001_stueck where id = {id};"))
+    name = name[0]["beschreibung_1"] + newpath
+    shutil.copy(data_folder / "db" / f"{id}.db", data_folder / "db" / "save" / f"{name}.db")
+    
+
+    
+    return get_my_jsonified_data_DB1("select * ,(select 'aktiv' from T000_status t0 where t0.key = 'akt_stueck_id' and t0.value = t1.id) as aktiv from T001_stueck t1 order by id desc;")
+
+
+
+@app.route("/api/stueck_reload",methods = ['GET'])
+def api_stueck_reload_GET():
+
+    try:
+        os.mkdir(data_folder / "db" / "archiv")
+    except:
+        pass
+
+    return os.listdir(data_folder / "db" / "archiv")
+    
+@app.route("/api/stueck_reload",methods = ['POST'])
+def api_stueck_reload_POST():
+
+
+    file = request.get_json()["file"]
+    set_sql_data_DB1(f"insert into T001_stueck (beschreibung_1, beschreibung_2, jahr) values( '{file.replace('.db','')}' , 'RELOAD' , '" +datetime.now().strftime("%Y")+"' );",[])
+    id = str(json.loads(get_my_jsonified_data_DB1("select max(id) id from T001_stueck" ) )[0]["id"])
+
+    shutil.copy(data_folder / "db" / "archiv" / f"{file}",data_folder / "db" / f"{id}.db" )
+    
+    return get_my_jsonified_data_DB1("select * ,(select 'aktiv' from T000_status t0 where t0.key = 'akt_stueck_id' and t0.value = t1.id) as aktiv from T001_stueck t1 order by id desc;")
+
+@app.route("/api/stueck_reload_from_save",methods = ['GET'])
+def api_stueck_reload_from_save_GET():
+
+    try:
+        os.mkdir(data_folder / "db" / "save")
+    except:
+        pass
+
+    return os.listdir(data_folder / "db" / "save")
+    
+@app.route("/api/stueck_reload_from_save",methods = ['POST'])
+def api_stueck_reload_from_save_POST():
+
+
+    file = request.get_json()["file"]
+    set_sql_data_DB1(f"insert into T001_stueck (beschreibung_1, beschreibung_2, jahr) values( '{file.replace('.db','')}' , 'RELOAD FROM SAVE' , '" +datetime.now().strftime("%Y")+"' );",[])
+    id = str(json.loads(get_my_jsonified_data_DB1("select max(id) id from T001_stueck" ) )[0]["id"])
+
+    shutil.copy(data_folder / "db" / "save" / f"{file}",data_folder / "db" / f"{id}.db" )
+    
     return get_my_jsonified_data_DB1("select * ,(select 'aktiv' from T000_status t0 where t0.key = 'akt_stueck_id' and t0.value = t1.id) as aktiv from T001_stueck t1 order by id desc;")
 
 

@@ -96,6 +96,113 @@ function stueck_delete(id)
 
 }
 
+function stueck_sicherung(id)
+{
+  
+  $.ajax({
+    url: "api/stueck_sicherung", //the page containing php script
+    type: "POST", //request type
+    dataType: 'json',
+    headers: { 'Content-Type': 'application/json' },
+    data: JSON.stringify({
+                id: id
+    }),
+      success:function(result){
+        cardausgeben(result, "ausgabe")
+        console.log(result);      
+    }
+    ,error: function(result){
+      
+      console.log(result);
+    }           
+  } );
+
+}
+
+function reload()
+{
+  
+  $.ajax({
+    url: "api/stueck_reload", //the page containing php script
+    type: "GET", //request type
+    dataType: 'json',
+    headers: { 'Content-Type': 'application/json' },
+
+      success:function(result){
+        //cardausgeben(result, "ausgabe")
+        console.log(result);      
+
+
+        $("#ausgabe").empty()
+        result.forEach(function(m, i) {
+        $("#ausgabe").append(
+          $("<button></button>").text(m).addClass("btn btn-primary").css("margin-top","20px").click(function(){
+
+            $.ajax({
+              url: "api/stueck_reload", //the page containing php script
+              type: "POST", //request type
+              dataType: 'json',
+              headers: { 'Content-Type': 'application/json' },
+              data: JSON.stringify({file : m
+                             }),
+                success:function(result){
+                  cardausgeben(result, "ausgabe")
+                }})
+          })
+        )
+        })
+
+    }
+    ,error: function(result){
+      
+      console.log(result);
+    }           
+  } );
+
+}
+
+function reload_from_save()
+{
+  
+  $.ajax({
+    url: "api/stueck_reload_from_save", //the page containing php script
+    type: "GET", //request type
+    dataType: 'json',
+    headers: { 'Content-Type': 'application/json' },
+
+      success:function(result){
+        //cardausgeben(result, "ausgabe")
+        console.log(result);      
+
+
+        $("#ausgabe").empty()
+        result.forEach(function(m, i) {
+        $("#ausgabe").append(
+          $("<button></button>").text(m).addClass("btn btn-primary").css("margin-top","20px").click(function(){
+
+            $.ajax({
+              url: "api/stueck_reload_from_save", //the page containing php script
+              type: "POST", //request type
+              dataType: 'json',
+              headers: { 'Content-Type': 'application/json' },
+              data: JSON.stringify({file : m
+                             }),
+                success:function(result){
+                  cardausgeben(result, "ausgabe")
+                }})
+          })
+        )
+        })
+
+    }
+    ,error: function(result){
+      
+      console.log(result);
+    }           
+  } );
+
+}
+
 
 function stueckauswahl(id)
 {
@@ -155,19 +262,24 @@ ct.click(function(){
   let j = $('<input type="number" class="form-control" id="jahr" name="jahr">')
   j.val(m.jahr)
 
-  let B = $('<button type="submit" class="btn btn-primary">Save</button>')
+  let B = $('<button></button>').text('Save').addClass("btn btn-primary").css('margin-right','10px').css("margin-top", "20px")
   B.click(function(){
     save(m.id, b1.val(),b2.val(),j.val())
     
   })
 
-  let D = $('<button type="submit" class="btn btn-danger">Delete</button>')
+  let D = $('<button></button>').text('Archiv').addClass("btn btn-danger").css('margin-right','10px').css("margin-top", "20px")
   D.click(function(){
     stueck_delete(m.id)
     
   })
-
-  cb.append(b1l,b1,b2l,b2,jl,j,B,D)
+  
+  let S = $('<button></button>').text('Sichern').addClass("btn btn-warning").css('margin-right','10px').css("margin-top", "20px")
+  S.click(function(){
+    stueck_sicherung(m.id)
+    
+  })
+  cb.append(b1l,b1,b2l,b2,jl,j,B,D,S)
 })
 
 let cont1 = $('<p class="card-text">'+m.beschreibung_2+'</p>')
