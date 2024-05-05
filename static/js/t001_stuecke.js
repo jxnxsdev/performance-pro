@@ -273,7 +273,7 @@ ct.click(function(){
     stueck_delete(m.id)
     
   })
-  
+  if (m.aktiv)D.prop('disabled', true); 
   let S = $('<button></button>').text('Sichern').addClass("btn btn-warning").css('margin-right','10px').css("margin-top", "20px")
   S.click(function(){
     stueck_sicherung(m.id)

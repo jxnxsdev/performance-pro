@@ -7,8 +7,32 @@ window.addEventListener('keydown', function(event){
   event.preventDefault(); 
 }); 
 
+$('#midi_send_all').click(function(){
+  
+  $.ajax({
+    url: "api/midi_send_all", //the page containing php script
+    type: "POST", //request type
+    dataType: 'json',
+    headers: { 'Content-Type': 'application/json' },
+    data: JSON.stringify({
+       value: Number($('#midi_send_all').prop('checked'))
+    })
+  })
+
+})
 
 
+
+$.ajax({
+  url: "api/midi_send_all", //the page containing php script
+  type: "GET", //request type
+  dataType: 'json',
+  headers: { 'Content-Type': 'application/json' },
+  success:function(result){
+    console.log(result)
+    if (result[0].value == '1'){$('#midi_send_all').prop('checked', true);}else{$('#midi_send_all').prop('checked', false);}
+  }
+})
 //document.getElementById("accordionFlushExample").appendChild( CreateAccordionItem());
 
 let g_besetzung

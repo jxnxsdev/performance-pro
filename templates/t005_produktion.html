@@ -8,7 +8,7 @@
     .ausw_button
     {
         margin-left: 10px;
-        margin-top: 10px;
+        margin-top: 15px;
     }
 
 </style>
@@ -35,6 +35,13 @@
 
                 <button onclick="send('ablauf_produktion_weiter')" class="btn btn-primary ausw_button">weiter F1</button>
                 <button onclick="send('ablauf_produktion_zurueck')" class="btn btn-primary ausw_button">zurück F2</button>
+                <hr>
+                <div class="form-check form-switch">
+                    <input class="form-check-input" type="checkbox" id="midi_send_all">
+                    <label class="form-check-label" for="midi_send_all">Alles senden</label>
+                  </div>
+
+
                 <hr>
                     <span class="fs-5 d-none d-sm-inline">Szene:</span>
                 

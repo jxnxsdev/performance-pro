@@ -59,6 +59,56 @@
 .btn_15{ border-color: #d5bfff!important;}
 .btn_16{ border-color: #aa80ff!important;}
 
+
+
+
+
+.tooltip-text {
+  visibility: hidden;
+  position: absolute;
+  z-index: 1;
+  width: 100px;
+  color: white;
+  font-size: 12px;
+  background-color: #192733;
+  border-radius: 10px;
+  padding: 10px 15px 10px 15px;
+}
+
+.hover-text:hover .tooltip-text {
+  visibility: visible;
+}
+
+#top {
+  top: -40px;
+  left: -50%;
+}
+
+#bottom {
+  top: 25px;
+  left: -50%;
+}
+
+#left {
+  top: -8px;
+  right: 120%;
+}
+
+#right {
+  top: -8px;
+  left: 120%;
+}
+
+.hover-text {
+  position: relative;
+  display: inline-block;
+  margin: 40px;
+  font-family: Arial;
+  text-align: center;
+}
+
+
+
   </style>
 
   </head>
@@ -114,6 +164,7 @@
           <a class="nav-link" href="t005_produktion">Produktion</a>
         </li>
         {% endif %}
+
       </ul>
       <!-- Left links -->
     </div>
@@ -151,6 +202,9 @@
           </li>
           <li>
             <a class="dropdown-item" href="midi_port">Auswahl Midi Port</a>
+          </li>
+          <li>
+            <a class="dropdown-item" href="t008_einstellungen">Einstellungen Farbe</a>
           </li>
         </ul>
       </div>

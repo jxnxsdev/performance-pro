@@ -134,7 +134,17 @@ def midi_ports_select():
     
     Midi_Verbindung_oeffnen(int(request.get_json()["id"]))
     return api_midi_port()
+
+@app.route("/api/midi_send_all",methods = ['POST'])
+def midi_send_all_POST():
+    set_sql_data_DB1("REPLACE into T000_status (value, key) values( ? , 'midi_send_all');",[request.get_json()["value"]])
     
+    return {}
+
+@app.route("/api/midi_send_all",methods = ['GET'])
+def midi_send_all_GET():
+    
+    return get_my_jsonified_data_DB1("select value from T000_status where key = 'midi_send_all';")
     
 ########################################################################################################################
 ############################################## Aufruf von Localhost
@@ -628,9 +638,11 @@ def midi_send(akt_ablauf):
     aktion = json.loads(json.loads(get_my_jsonified_data('select aktion from t004_ablauf where ablauf_id = '+ akt_ablauf ))[0]['aktion'])
     kanaele = json.loads(get_my_jsonified_data('select id, midi_kanal, midi_befehl,akt_value from t002_kanaele where aktiv = 1 and maskierung = 0'))
     
+    midi_send_all = int(json.loads(get_my_jsonified_data_DB1("select value from T000_status where key = 'midi_send_all';") )[0]["value"])
+
     for kanal in kanaele:
         neue_aktion = aktion_kanal(aktion, kanal["id"])
-        if kanal["akt_value"] != neue_aktion:
+        if kanal["akt_value"] != neue_aktion or midi_send_all == 1:
             midi_send_message(kanal, neue_aktion, kanal["akt_value"])
 
 
