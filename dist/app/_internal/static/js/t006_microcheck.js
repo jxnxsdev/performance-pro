@@ -47,15 +47,15 @@ function microcheck_lesen()
     data: JSON.stringify({    }),
       success:function(result){
         let offen = 0, fertig = 0
-        if (result.length == 2){
-          if (result[0].microcheck == 0)offen = result[0].checkmenge + result[1].checkmenge
-          if (result[1].microcheck == 0)offen = result[1].checkmenge + result[0].checkmenge
-          if (result[0].microcheck == 1)fertig = result[0].checkmenge
-          if (result[1].microcheck == 1)fertig = result[1].checkmenge
+        if (result["microcheck"].length == 2){
+          if (result["microcheck"][0].microcheck == 0)offen = result["microcheck"][0].checkmenge + result["microcheck"][1].checkmenge
+          if (result["microcheck"][1].microcheck == 0)offen = result["microcheck"][1].checkmenge + result["microcheck"][0].checkmenge
+          if (result["microcheck"][0].microcheck == 1)fertig = result["microcheck"][0].checkmenge
+          if (result["microcheck"][1].microcheck == 1)fertig = result["microcheck"][1].checkmenge
         }
-        if (result.length == 1){
-          if (result[0].microcheck == 0)offen = result[0].checkmenge 
-          if (result[0].microcheck == 1){fertig = result[0].checkmenge;             offen = result[0].checkmenge;}
+        if (result["microcheck"].length == 1){
+          if (result["microcheck"][0].microcheck == 0)offen = result["microcheck"][0].checkmenge 
+          if (result["microcheck"][0].microcheck == 1){fertig = result["microcheck"][0].checkmenge;             offen = result["microcheck"][0].checkmenge;}
         }
         
         $("#checkmenge").html( "Check: " + fertig+ "/" + offen)
@@ -64,7 +64,12 @@ function microcheck_lesen()
         g_fertig = fertig 
        
 
-
+        result["maskiert"].forEach(function(m){
+          console.log(m)
+          let c = $("#"+m.id)
+          if (m.microcheck == 1)c.css("background-color",'#008f00');
+          if (m.microcheck == 1 && m.maskierung == 1)c.css("background-color",'#ff2200');
+        })
         
       
     }
@@ -108,7 +113,7 @@ function cardausgeben(DatenAusgabe, AusgabeID) {
               
               if (m.microcheck == 1)c.css("background-color",'#008f00');
               if (m.microcheck == 1 && m.maskierung == 1)c.css("background-color",'#ff2200');
-
+              c.attr('id',m.id)
               cb.click(function(){
                 $.ajax({
                   url: "api/microcheck_toggle", //the page containing php script

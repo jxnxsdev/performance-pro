@@ -704,9 +704,11 @@ def api_microcheck_toggle():
 @app.route("/api/checkmenge",methods = ['POST'])
 def api_checkmenge():
     microcheck = json.loads(get_my_jsonified_data("select microcheck as microcheck, count(1) checkmenge from T002_kanaele where aktiv = 1 group by microcheck"))
-     
-    
-    return microcheck
+    maskiert = json.loads(get_my_jsonified_data("select maskierung , id, microcheck from T002_kanaele where aktiv = 1 "))
+    res = {}
+    res["microcheck"] = microcheck
+    res["maskiert"] = maskiert
+    return res
 
 
 #######################################################################################################################
