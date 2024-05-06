@@ -8,6 +8,8 @@ import sys
 import rtmidi
 import shutil
 import os
+version = 1.41
+
 app = Flask(__name__)
 
 if sys.platform == 'win32':
